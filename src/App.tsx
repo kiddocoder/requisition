@@ -2,7 +2,8 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import "./App.css"
 import React from "react"
-import Overview from "./pages/Overview"
+// import Overview from "./pages/Overview"
+import Requisition from "./pages/Requisition";
 import AppLayout from "./components/layouts/AppLayout"
 
 function App(): React.ReactElement {
@@ -13,7 +14,7 @@ function App(): React.ReactElement {
       children: [
         {
           path: "/",
-          element: <Overview />
+          element: <Requisition />
         }
       ]
     }

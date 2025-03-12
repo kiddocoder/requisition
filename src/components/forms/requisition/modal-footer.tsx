@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { ArrowLeft, ArrowRight, Send } from "lucide-react"
-import type { ModalFooterProps } from "../../types/requisition"
+import type { ModalFooterProps } from "../../../types/requisition"
 
 export const ModalFooter: React.FC<ModalFooterProps> = ({
     step,
@@ -42,8 +42,8 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({
                         onClick={onNext}
                         disabled={isNextDisabled}
                         className={`px-4 py-2 rounded-md flex items-center gap-2 ${isNextDisabled
-                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                : "bg-blue-600 text-white hover:bg-blue-700"
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            : "bg-blue-600 text-white hover:bg-blue-700"
                             }`}
                     >
                         Suivant

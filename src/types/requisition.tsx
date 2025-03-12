@@ -3,6 +3,7 @@ export type PriorityType = "low" | "normal" | "high"
 
 export interface RequisitionItem {
     id?: string
+    fourniseur: string,
     designation: string
     uniteMesure: string
     quantiteDemande: string
@@ -10,17 +11,17 @@ export interface RequisitionItem {
     prixUnitaire: string
     prixTotal: string
     type: TransactionType
-    advancePayment: string
+    advancePayment: string,
+    titre: string,
+    objet: string,
+    date: string | null,
 }
 
 export interface RequisitionFormData {
-    title: string
-    items: RequisitionItem[]
-    supplier: string
-    department: string
-    requisitionDate: string
-    comments: string
-    priority: PriorityType
+    titre: string,
+    objet: string,
+    date: string | null,
+    items: any[]
 }
 
 export interface FormErrors {
@@ -29,12 +30,11 @@ export interface FormErrors {
 
 export interface StepProps {
     formData: RequisitionFormData
-    updateFormData: (data: Partial<RequisitionFormData>) => void
+    setFormData: (data: Partial<RequisitionFormData>) => void
     errors: FormErrors
     setErrors: (errors: FormErrors) => void
     onNext: () => void
     onPrevious: () => void
-    calculateGrandTotal: () => number
 }
 
 export interface StepIndicatorProps {

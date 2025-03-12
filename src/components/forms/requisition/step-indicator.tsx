@@ -1,5 +1,5 @@
 import React from "react"
-import type { StepIndicatorProps } from "../../types/requisition"
+import type { StepIndicatorProps } from "../../../types/requisition"
 
 export const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, steps }) => {
     return (

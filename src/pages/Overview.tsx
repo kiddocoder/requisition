@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { RequisitionModal } from "../components/forms/RequistionModal"
+import { RequisitionModal } from "../components/forms/requisition/RequistionModal"
 import {
     Plus,
     Trash2,

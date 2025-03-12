@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { X, ChevronDown } from "lucide-react"
-import type { ModalHeaderProps } from "../../types/requisition"
+import type { ModalHeaderProps } from "../../../types/requisition"
 
 export const ModalHeader: React.FC<ModalHeaderProps> = ({ title, isFullScreen, toggleFullScreen, onClose }) => {
     return (

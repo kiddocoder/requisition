@@ -3,13 +3,13 @@
 import type React from "react"
 
 import { useState } from "react"
-import type { RequisitionModalProps, RequisitionFormData, FormErrors, PriorityType } from "../../types/requisition"
+import type { RequisitionModalProps, RequisitionFormData, FormErrors, PriorityType } from "../../../types/requisition"
 import { StepIndicator } from "./step-indicator"
 import { ModalHeader } from "./modal-header"
 import { ModalFooter } from "./modal-footer"
-import { StepOne } from "./steps/step-one"
-import { StepTwo } from "./steps/step-two"
-import { StepThree } from "./steps/step-three"
+import { StepOne } from "./step-one"
+import { StepTwo } from "./step-two"
+import { StepThree } from "./step-three"
 
 export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) => {
     const [step, setStep] = useState(1)
