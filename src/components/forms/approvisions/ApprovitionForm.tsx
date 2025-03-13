@@ -4,6 +4,7 @@ import { StepIndicator } from "../step-indicator"
 import { Plus, Trash2, FileText, X, Check, AlertTriangle, Package, CreditCard, DollarSign, AlertCircle, CheckCircle } from 'lucide-react'
 
 import type { RequisitionItem } from "../../../types/requisition"
+import { useNavigate } from "react-router-dom"
 
 // Données simulées pour les articles de réquisition disponibles
 const availableRequisitions = [
@@ -96,6 +97,7 @@ function ApprovitionForm() {
     const [showModal, setShowModal] = useState(false)
     const [modalContent, setModalContent] = useState({ title: "", message: "", type: "" })
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const navigate = useNavigate();
 
     // Référence pour l'input de fichier
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -200,7 +202,7 @@ function ApprovitionForm() {
 
         try {
             // Simuler un appel API
-            await new Promise(resolve => setTimeout(resolve, 2000))
+            await new Promise(resolve => setTimeout(resolve, 3000))
 
             console.log("Approvisionnement soumis avec succès:", {
                 items: selectedItems,
@@ -225,6 +227,7 @@ function ApprovitionForm() {
                 setComment("")
                 setAttachments([])
             }, 1000)
+            navigate("/comptabilite");
         } catch (error) {
             console.error("Erreur lors de la soumission:", error)
             showModalAlert("Erreur", "Une erreur est survenue lors de l'envoi de votre demande. Veuillez réessayer.", "error")

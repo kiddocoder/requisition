@@ -1,12 +1,10 @@
-"use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
+import { Link, useNavigate } from "react-router-dom"
 import { Eye, EyeOff, Lock, Mail, AlertCircle, CheckCircle2 } from "lucide-react"
 
 export default function Login() {
-    const router = useRouter()
+    const navigate = useNavigate()
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [rememberMe, setRememberMe] = useState(false)
@@ -27,11 +25,11 @@ export default function Login() {
             // Vérification simple (à remplacer par un vrai appel API)
             if (email && password) {
                 console.log("Connexion réussie!", { email, rememberMe })
-                setSuccess(true)
+                setSuccess(true || false)
 
                 // Rediriger après connexion réussie
                 setTimeout(() => {
-                    router.push("/dashboard")
+                    navigate("/requisition")
                 }, 1000)
             } else {
                 throw new Error("Veuillez remplir tous les champs")
@@ -92,7 +90,7 @@ export default function Login() {
                                     Mot de passe
                                 </label>
                                 <Link
-                                    href="/mot-de-passe-oublie"
+                                    to="/password-reset"
                                     className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
                                 >
                                     Mot de passe oublié?
@@ -134,8 +132,8 @@ export default function Login() {
                         <button
                             type="submit"
                             className={`w-full py-2.5 px-4 rounded-md text-white font-medium ${loading
-                                    ? "bg-blue-400 cursor-not-allowed"
-                                    : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                ? "bg-blue-400 cursor-not-allowed"
+                                : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                                 }`}
                             disabled={loading}
                         >
@@ -146,7 +144,7 @@ export default function Login() {
                     <div className="mt-6 text-center text-sm">
                         <p className="text-blue-700">
                             Vous n&apos;avez pas de compte?{" "}
-                            <Link href="/inscription" className="font-medium text-blue-600 hover:text-blue-800 hover:underline">
+                            <Link to="/inscription" className="font-medium text-blue-600 hover:text-blue-800 hover:underline">
                                 Créer un compte
                             </Link>
                         </p>

@@ -1,91 +1,41 @@
-import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, LogIn, UserPlus, ArrowRight, CheckCircle, DollarSign, Clipboard } from 'lucide-react';
+import { LogIn, UserPlus, ArrowRight, CheckCircle, DollarSign, Clipboard } from 'lucide-react';
+import { Splide, SplideSlide } from '@splidejs/react-splide';
+import '@splidejs/splide/dist/css/splide.min.css';
+import BannerImage from "../assets/purchaserequisition.png";
+import testimonials from "../stores/testimonials";
+import { Link } from 'react-router-dom';
 
 const Onboarding = () => {
-    const [currentSlide, setCurrentSlide] = useState(0);
+    // Données des témoignages avec des avatars réels
 
-    // Données des témoignages
-    const testimonials = [
-        {
-            id: 1,
-            name: "Sophie Martin",
-            role: "Directrice Financière",
-            company: "Groupe Lumina",
-            avatar: "/api/placeholder/60/60",
-            text: "Ce système a transformé notre processus de réquisition. Nous avons réduit notre temps de traitement de 70% et gagné en transparence."
-        },
-        {
-            id: 2,
-            name: "Thomas Dubois",
-            role: "Responsable Achats",
-            company: "Tech Solutions",
-            avatar: "/api/placeholder/60/60",
-            text: "L'interface intuitive nous permet de gérer efficacement toutes nos demandes. La validation en plusieurs étapes assure un contrôle parfait des dépenses."
-        },
-        {
-            id: 3,
-            name: "Julie Leroy",
-            role: "Directrice Administrative",
-            company: "Innov Santé",
-            avatar: "/api/placeholder/60/60",
-            text: "Après 6 mois d'utilisation, nous avons constaté une réduction des erreurs de 85% et une meilleure coordination entre nos départements."
-        }
-    ];
-
-    // Auto-rotation pour le slider
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentSlide((prev) => (prev + 1) % testimonials.length);
-        }, 5000);
-        return () => clearInterval(interval);
-    }, [testimonials.length]);
-
-    // Gestion des flèches du slider
-    const handlePrevSlide = () => {
-        setCurrentSlide((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-    };
-
-    const handleNextSlide = () => {
-        setCurrentSlide((prev) => (prev + 1) % testimonials.length);
-    };
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-50">
             {/* Bannière immersive avec waves et dégradés */}
-            <div className="relative h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-500 to-purple-700">
-                <div className="absolute inset-0 z-0">
-                    <svg className="w-full h-full" viewBox="0 0 1440 320" preserveAspectRatio="none">
-                        <path
-                            fill="rgba(255, 255, 255, 0.1)"
-                            d="M0,128L48,133.3C96,139,192,149,288,144C384,139,480,117,576,122.7C672,128,768,160,864,165.3C960,171,1056,149,1152,138.7C1248,128,1344,128,1392,128L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-                        ></path>
-                        <path
-                            fill="rgba(255, 255, 255, 0.2)"
-                            d="M0,256L48,240C96,224,192,192,288,176C384,160,480,160,576,181.3C672,203,768,245,864,240C960,235,1056,181,1152,170.7C1248,160,1344,192,1392,208L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-                        ></path>
-                    </svg>
-                </div>
+            <div className="relative h-screen flex items-center justify-center overflow-hidden  bg-[#5479f7]">
 
                 {/* CTA en haut */}
                 <div className="absolute top-4 right-4 flex space-x-3 z-10">
-                    <button className="px-4 py-2 bg-white text-indigo-600 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center space-x-2">
+                    <Link
+                        to="/login"
+                        className="px-4 py-2 bg-white text-indigo-600 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center space-x-2">
                         <LogIn size={18} />
                         <span>Se connecter</span>
-                    </button>
-                    <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all flex items-center space-x-2">
-                        <UserPlus size={18} />
-                        <span>Créer un compte</span>
-                    </button>
+                    </Link>
                 </div>
 
                 {/* Contenu central de la bannière */}
                 <div className="max-w-4xl mx-auto text-center px-6 z-10">
-                    <div className="animate-fade-in-up">
-                        <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">Simplifiez vos demandes de réquisition</h1>
-                        <p className="text-xl md:text-2xl text-blue-100 mb-10">Une plateforme intuitive pour gérer l'ensemble du processus d'achat, de la demande à l'approbation</p>
-                        <button className="px-8 py-4 bg-white text-indigo-600 rounded-xl shadow-xl hover:shadow-2xl transition-all text-lg font-semibold hover:bg-indigo-50">
-                            Commencer maintenant
-                        </button>
+                    <div className='flex flex-col md:flex-row  items-center py-8 px-8 bg-[#5479f7]'>
+                        <div className="animate-fade-in">
+                            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">Simplifiez vos demandes de réquisition</h1>
+                            <p className="text-xl md:text-2xl text-blue-100 mb-10">Une plateforme intuitive pour gérer l'ensemble du processus d'achat, de la demande à l'approbation</p>
+                            <button className="px-8 py-4 bg-white text-indigo-600 rounded-xl shadow-xl hover:shadow-2xl transition-all text-lg font-semibold hover:bg-indigo-50">
+                                Commencer maintenant
+                            </button>
+                        </div>
+
+                        <img src={BannerImage} className='hidden md:block w-full h-full object-cover' alt="banner" />
                     </div>
                 </div>
 
@@ -159,65 +109,52 @@ const Onboarding = () => {
                 </div>
             </div>
 
-            {/* Section Témoignages avec slider */}
+            {/* Section Témoignages avec Splide */}
             <div className="py-20 bg-indigo-50">
                 <div className="max-w-6xl mx-auto px-6">
                     <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-16">Ce qu'en disent nos clients</h2>
 
-                    <div className="relative">
-                        {/* Les témoignages */}
-                        <div className="overflow-hidden">
-                            <div
-                                className="flex transition-transform duration-500 ease-in-out"
-                                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-                            >
-                                {testimonials.map((testimonial) => (
-                                    <div key={testimonial.id} className="w-full flex-shrink-0 px-4">
-                                        <div className="bg-white rounded-xl p-8 shadow-lg">
-                                            <div className="flex items-center mb-6">
-                                                <img
-                                                    src={testimonial.avatar}
-                                                    alt={testimonial.name}
-                                                    className="w-14 h-14 rounded-full mr-4"
-                                                />
-                                                <div>
-                                                    <h4 className="text-xl font-semibold text-gray-800">{testimonial.name}</h4>
-                                                    <p className="text-gray-600">{testimonial.role}, {testimonial.company}</p>
-                                                </div>
+                    <Splide
+                        options={{
+                            type: 'loop',
+                            perPage: 2,
+                            autoplay: true,
+                            interval: 5000,
+                            pauseOnHover: true,
+                            pagination: true,
+                            arrows: false,
+                            breakpoints: {
+                                1024: {
+                                    perPage: 2,
+                                },
+                                640: {
+                                    perPage: 1,
+                                },
+                            },
+                        }}
+                    >
+                        {
+                            testimonials.map((testimonial) => (
+                                <SplideSlide key={testimonial.id}>
+                                    <div className="bg-white rounded-xl p-8 shadow-lg mx-4">
+                                        <div className="flex items-center mb-6">
+                                            <img
+                                                src={testimonial.avatar}
+                                                alt={testimonial.name}
+                                                className="w-14 h-14 rounded-full mr-4"
+                                            />
+                                            <div>
+                                                <h4 className="text-xl font-semibold text-gray-800">{testimonial.name}</h4>
+                                                <p className="text-gray-600">{testimonial.role}, {testimonial.company}</p>
                                             </div>
-                                            <p className="text-gray-700 text-lg italic">{testimonial.text}</p>
                                         </div>
+                                        <p className="text-gray-700 text-lg italic">{testimonial.text}</p>
                                     </div>
-                                ))}
-                            </div>
-                        </div>
+                                </SplideSlide>
+                            ))
+                        }
 
-                        {/* Navigation du slider */}
-                        <button
-                            onClick={handlePrevSlide}
-                            className="absolute top-1/2 left-0 -ml-4 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-100 focus:outline-none"
-                        >
-                            <ChevronLeft className="w-6 h-6 text-gray-700" />
-                        </button>
-
-                        <button
-                            onClick={handleNextSlide}
-                            className="absolute top-1/2 right-0 -mr-4 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-100 focus:outline-none"
-                        >
-                            <ChevronRight className="w-6 h-6 text-gray-700" />
-                        </button>
-
-                        {/* Indicateurs */}
-                        <div className="flex justify-center mt-8 space-x-2">
-                            {testimonials.map((_, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => setCurrentSlide(index)}
-                                    className={`w-3 h-3 rounded-full ${currentSlide === index ? 'bg-indigo-600' : 'bg-gray-300'}`}
-                                ></button>
-                            ))}
-                        </div>
-                    </div>
+                    </Splide>
                 </div>
             </div>
 
@@ -261,11 +198,11 @@ const Onboarding = () => {
                     </div>
 
                     <div className="pt-8 border-t border-gray-700 text-center text-gray-500">
-                        <p>&copy; 2025 Réquisition Pro. Tous droits réservés.</p>
+                        <p>&copy; 2025 <a target='_blank' href="https://www.github.com/kiddocoder/" className="text-blue-500 hover:underline">KiddoPro_Dev</a>, Requisition Pro Inc.'. Tous droits réservés.</p>
                     </div>
                 </div>
             </footer>
-        </div>
+        </div >
     );
 };
 

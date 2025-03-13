@@ -4,17 +4,19 @@ import type React from "react"
 
 import { useState } from "react"
 import type { RequisitionModalProps, FormErrors } from "../../../types/requisition"
-import { StepIndicator } from "./step-indicator"
+import { StepIndicator } from "../step-indicator"
 import { ModalHeader } from "./modal-header"
 import { ModalFooter } from "./modal-footer"
 import { StepOne } from "./step-one"
 import { StepTwo } from "./step-two"
 import { StepThree } from "./step-three"
+import { useNavigate } from "react-router-dom"
 
 export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) => {
     const [step, setStep] = useState(3)
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [formErrors, setFormErrors] = useState<FormErrors>({})
+    const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
         titre: "",
@@ -65,6 +67,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) =
         // Afficher une notification de succès
         alert("Réquisition soumise avec succès!")
         onClose()
+        navigate("/approvisionnement")
     }
 
     const toggleFullScreen = () => {

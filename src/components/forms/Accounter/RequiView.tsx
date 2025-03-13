@@ -1,49 +1,31 @@
-"use client"
-
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@mui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Check, X, Trash2, AlertCircle } from "lucide-react"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Types pour les données
 interface Item {
-    id: string
-    name: string
-    quantity: number
-    unitPrice: number
-    totalPrice: number
+    id: string;
+    name: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
 }
 
 interface Requisition {
-    id: string
-    requestedBy: string
-    department: string
-    date: string
-    status: "pending" | "approved" | "rejected"
-    items: Item[]
-    totalAmount: number
-    comments: Comment[]
+    id: string;
+    requestedBy: string;
+    department: string;
+    date: string;
+    status: "pending" | "approved" | "rejected";
+    items: Item[];
+    totalAmount: number;
+    comments: Comment[];
 }
 
 interface Comment {
-    id: string
-    author: string
-    text: string
-    date: string
+    id: string;
+    author: string;
+    text: string;
+    date: string;
 }
 
 // Données d'exemple
@@ -67,11 +49,12 @@ const sampleRequisition: Requisition = {
             date: "2023-05-16",
         },
     ],
-}
+};
 
-export default function RequisitionReview() {
-    const [requisition, setRequisition] = useState<Requisition>(sampleRequisition)
-    const [comment, setComment] = useState("")
+export default function RequisitionAccounter() {
+    const [requisition, setRequisition] = useState<Requisition>(sampleRequisition);
+    const [comment, setComment] = useState("");
+    const navigate = useNavigate();
 
     // Fonction pour approuver la réquisition
     const approveRequisition = () => {
@@ -87,9 +70,12 @@ export default function RequisitionReview() {
                     date: new Date().toISOString().split("T")[0],
                 },
             ],
-        }))
-        setComment("")
-    }
+        }));
+        setComment("");
+        setTimeout(() => {
+            navigate("/direction")
+        }, 2000)
+    };
 
     // Fonction pour rejeter la réquisition
     const rejectRequisition = () => {
@@ -105,14 +91,14 @@ export default function RequisitionReview() {
                     date: new Date().toISOString().split("T")[0],
                 },
             ],
-        }))
-        setComment("")
-    }
+        }));
+        setComment("");
+    };
 
     // Fonction pour supprimer un article
     const removeItem = (itemId: string) => {
-        const updatedItems = requisition.items.filter((item) => item.id !== itemId)
-        const newTotalAmount = updatedItems.reduce((sum, item) => sum + item.totalPrice, 0)
+        const updatedItems = requisition.items.filter((item) => item.id !== itemId);
+        const newTotalAmount = updatedItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
         setRequisition((prev) => ({
             ...prev,
@@ -127,8 +113,8 @@ export default function RequisitionReview() {
                     date: new Date().toISOString().split("T")[0],
                 },
             ],
-        }))
-    }
+        }));
+    };
 
     // Fonction pour annuler la réquisition
     const cancelRequisition = () => {
@@ -144,176 +130,150 @@ export default function RequisitionReview() {
                     date: new Date().toISOString().split("T")[0],
                 },
             ],
-        }))
-    }
+        }));
+    };
 
     return (
-        <div className="container mx-auto py-6">
-            <Card className="w-full">
-                <CardHeader>
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <CardTitle>Révision de Réquisition - Service Comptabilité</CardTitle>
-                            <CardDescription>Examiner et approuver les demandes de réquisition</CardDescription>
-                        </div>
-                        <Badge
-                            variant={
-                                requisition.status === "approved"
-                                    ? "default"
-                                    : requisition.status === "rejected"
-                                        ? "destructive"
-                                        : "outline"
-                            }
-                        >
-                            {requisition.status === "approved"
-                                ? "Approuvée"
-                                : requisition.status === "rejected"
-                                    ? "Rejetée"
-                                    : "En attente"}
-                        </Badge>
-                    </div>
-                </CardHeader>
+        <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div className="bg-white rounded-lg shadow-lg p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Révision de Réquisition - Service Comptabilité</h3>
+                <p className="text-sm text-gray-600">Examiner et approuver les demandes de réquisition</p>
 
-                <CardContent className="space-y-6">
-                    {/* Informations de la réquisition */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/20">
-                        <div>
-                            <p className="text-sm font-medium">Numéro de réquisition</p>
-                            <p className="text-sm">{requisition.id}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium">Demandeur</p>
-                            <p className="text-sm">{requisition.requestedBy}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium">Département</p>
-                            <p className="text-sm">{requisition.department}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium">Date de demande</p>
-                            <p className="text-sm">{requisition.date}</p>
-                        </div>
-                    </div>
-
-                    {/* Liste des articles */}
+                {/* Informations de la réquisition */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 bg-blue-50 p-4 rounded-lg">
                     <div>
-                        <h3 className="text-lg font-medium mb-2">Articles demandés</h3>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Description</TableHead>
-                                    <TableHead className="text-right">Quantité</TableHead>
-                                    <TableHead className="text-right">Prix unitaire</TableHead>
-                                    <TableHead className="text-right">Prix total</TableHead>
-                                    <TableHead className="text-right">Action</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {requisition.items.map((item) => (
-                                    <TableRow key={item.id}>
-                                        <TableCell>{item.name}</TableCell>
-                                        <TableCell className="text-right">{item.quantity}</TableCell>
-                                        <TableCell className="text-right">{item.unitPrice.toFixed(2)} €</TableCell>
-                                        <TableCell className="text-right">{item.totalPrice.toFixed(2)} €</TableCell>
-                                        <TableCell className="text-right">
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon">
-                                                        <Trash2 className="h-4 w-4 text-destructive" />
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Supprimer cet article?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            Cette action ne peut pas être annulée. Cet article sera retiré de la réquisition.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => removeItem(item.id)}>Supprimer</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </TableCell>
-                                    </TableRow>
+                        <p className="text-sm font-medium text-blue-700">Numéro de réquisition</p>
+                        <p className="text-sm text-gray-900">{requisition.id}</p>
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-blue-700">Demandeur</p>
+                        <p className="text-sm text-gray-900">{requisition.requestedBy}</p>
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-blue-700">Département</p>
+                        <p className="text-sm text-gray-900">{requisition.department}</p>
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-blue-700">Date de demande</p>
+                        <p className="text-sm text-gray-900">{requisition.date}</p>
+                    </div>
+                </div>
+
+                {/* Articles demandés */}
+                <div className="mt-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4">Articles demandés</h4>
+                    <div className="overflow-x-auto border border-gray-200 p-2 rounded-lg">
+                        <table className="min-w-full">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-4 py-2 text-left text-sm font-medium text-blue-700">#</th>
+                                    <th className="px-4 py-2 text-left text-sm font-medium text-blue-700">Description</th>
+                                    <th className="px-4 py-2 text-right text-sm font-medium text-blue-700">Quantité</th>
+                                    <th className="px-4 py-2 text-right text-sm font-medium text-blue-700">Prix unitaire</th>
+                                    <th className="px-4 py-2 text-right text-sm font-medium text-blue-700">Prix total</th>
+                                    <th className="px-4 py-2 text-right text-sm font-medium text-blue-700">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {requisition.items.map((item, index) => (
+                                    <tr key={item.id} className="border-b border-gray-100 odd:bg-gray-100">
+                                        <td className="px-4 py-2 text-sm text-gray-900">{index + 1}</td>
+                                        <td className="px-4 py-2 text-sm text-gray-900">{item.name}</td>
+                                        <td className="px-4 py-2 text-right text-sm text-gray-900">{item.quantity}</td>
+                                        <td className="px-4 py-2 text-right text-sm text-gray-900">{item.unitPrice.toFixed(2)} €</td>
+                                        <td className="px-4 py-2 text-right text-sm text-gray-900">{item.totalPrice.toFixed(2)} €</td>
+                                        <td className="px-4 py-2 text-right">
+                                            <button
+                                                className="text-red-500 hover:text-red-700 transition-colors"
+                                                onClick={() => removeItem(item.id)}
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </td>
+                                    </tr>
                                 ))}
-                                <TableRow>
-                                    <TableCell colSpan={3} className="text-right font-bold">
-                                        Montant Total
-                                    </TableCell>
-                                    <TableCell className="text-right font-bold">{requisition.totalAmount.toFixed(2)} €</TableCell>
-                                    <TableCell></TableCell>
-                                </TableRow>
-                            </TableBody>
-                        </Table>
+                                <tr>
+                                    <td colSpan={4} className="text-right text-sm font-bold text-gray-800">Total</td>
+                                    <td className="text-right text-sm font-bold text-gray-800">{requisition.totalAmount.toFixed(2)} €</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
+                </div>
 
-                    {/* Commentaires */}
-                    <div>
-                        <h3 className="text-lg font-medium mb-2">Historique des commentaires</h3>
-                        <div className="space-y-2 max-h-40 overflow-y-auto p-2 border rounded-lg">
-                            {requisition.comments.map((comment) => (
-                                <div key={comment.id} className="p-2 bg-muted/20 rounded">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="font-medium">{comment.author}</span>
-                                        <span className="text-muted-foreground">{comment.date}</span>
-                                    </div>
-                                    <p className="text-sm mt-1">{comment.text}</p>
-                                </div>
-                            ))}
-                        </div>
+                {/* Historique des commentaires */}
+                <div className="mt-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4">Historique des commentaires</h4>
+                    <div className="relative">
+                        {/* Ligne verticale de la chronologie */}
+                        <div className="absolute left-0 top-0 h-full w-0.5 bg-gray-200"></div>
+
+                        <ul className="list-none space-y-8 pl-8">
+                            {requisition.comments
+                                .slice()
+                                .reverse()
+                                .map((comment) => (
+                                    <li key={comment.id} className="relative">
+                                        {/* Point de la chronologie */}
+                                        <div className="absolute -left-9 top-1.5 h-3 w-3 rounded-full bg-blue-500 border-2 border-white"></div>
+
+                                        {/* Contenu du commentaire */}
+                                        <div className="bg-gray-50/10 p-4 rounded-lg border border-gray-100">
+                                            <div className="flex items-center justify-between">
+                                                <h5 className="text-sm font-semibold text-gray-800">
+                                                    {comment.author}
+                                                </h5>
+                                                <span className="text-xs text-gray-500">
+                                                    {new Date(comment.date).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm mt-2 text-gray-700">
+                                                {comment.text}
+                                            </p>
+                                        </div>
+                                    </li>
+                                ))}
+                        </ul>
                     </div>
+                </div>
 
-                    {/* Ajouter un commentaire */}
-                    <div>
-                        <h3 className="text-lg font-medium mb-2">Ajouter un commentaire</h3>
-                        <Textarea
-                            placeholder="Entrez votre commentaire ici..."
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            className="min-h-[100px]"
-                        />
-                    </div>
-                </CardContent>
+                {/* Ajouter un commentaire */}
+                <div className="mt-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4">Ajouter un commentaire</h4>
+                    <textarea
+                        className="w-full p-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500"
+                        placeholder="Entrez votre commentaire ici..."
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                    />
+                </div>
 
-                <CardFooter className="flex justify-between">
+                {/* Boutons d'action */}
+                <div className="mt-6 flex flex-col sm:flex-row justify-between gap-4">
+                    <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                        onClick={cancelRequisition}
+                    >
+                        Annuler la réquisition
+                    </button>
                     <div className="flex gap-2">
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="destructive">
-                                    <X className="mr-2 h-4 w-4" />
-                                    Annuler la réquisition
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Annuler cette réquisition?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        Cette action ne peut pas être annulée. La réquisition sera rejetée définitivement.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Retour</AlertDialogCancel>
-                                    <AlertDialogAction onClick={cancelRequisition}>Confirmer l'annulation</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    </div>
-
-                    <div className="flex gap-2">
-                        <Button variant="outline" onClick={rejectRequisition}>
-                            <AlertCircle className="mr-2 h-4 w-4" />
+                        <button
+                            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
+                            onClick={rejectRequisition}
+                        >
                             Rejeter
-                        </Button>
-                        <Button onClick={approveRequisition}>
-                            <Check className="mr-2 h-4 w-4" />
-                            Approuver
-                        </Button>
+                        </button>
+                        <button
+                            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                            onClick={approveRequisition}
+                        >
+                            Valider
+                        </button>
                     </div>
-                </CardFooter>
-            </Card>
+                </div>
+            </div>
         </div>
-    )
+    );
 }
-

@@ -1,52 +1,33 @@
-"use client"
-
-import { useState, useRef } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-import { Check, Printer, Save, Mail, FileText, Download, CheckCircle } from "lucide-react"
+import { useState, useRef } from "react";
+import { Check, Printer, Save, Mail, FileText, Download, CheckCircle } from "lucide-react";
 
 // Types pour les données
 interface Item {
-    id: string
-    name: string
-    quantity: number
-    unitPrice: number
-    totalPrice: number
+    id: string;
+    name: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
 }
 
 interface Requisition {
-    id: string
-    requestedBy: string
-    department: string
-    date: string
-    status: "pending" | "approved" | "rejected" | "finalized"
-    items: Item[]
-    totalAmount: number
-    comments: Comment[]
-    approvedBy?: string
-    approvalDate?: string
+    id: string;
+    requestedBy: string;
+    department: string;
+    date: string;
+    status: "pending" | "approved" | "rejected" | "finalized";
+    items: Item[];
+    totalAmount: number;
+    comments: Comment[];
+    approvedBy?: string;
+    approvalDate?: string;
 }
 
 interface Comment {
-    id: string
-    author: string
-    text: string
-    date: string
+    id: string;
+    author: string;
+    text: string;
+    date: string;
 }
 
 // Données d'exemple
@@ -76,17 +57,17 @@ const sampleRequisition: Requisition = {
             date: "2023-05-17",
         },
     ],
-}
+};
 
 export default function RequisitionApproval() {
-    const [requisition, setRequisition] = useState<Requisition>(sampleRequisition)
-    const [comment, setComment] = useState("")
-    const [emailTo, setEmailTo] = useState("")
-    const [emailSent, setEmailSent] = useState(false)
-    const [savedSuccess, setSavedSuccess] = useState(false)
+    const [requisition, setRequisition] = useState<Requisition>(sampleRequisition);
+    const [comment, setComment] = useState("");
+    const [emailTo, setEmailTo] = useState("");
+    const [emailSent, setEmailSent] = useState(false);
+    const [savedSuccess, setSavedSuccess] = useState(false);
 
     // Référence pour simuler l'impression
-    const printRef = useRef<HTMLDivElement>(null)
+    const printRef = useRef<HTMLDivElement>(null);
 
     // Fonction pour finaliser la réquisition
     const finalizeRequisition = () => {
@@ -104,319 +85,301 @@ export default function RequisitionApproval() {
                     date: new Date().toISOString().split("T")[0],
                 },
             ],
-        }))
-        setComment("")
-    }
+        }));
+        setComment("");
+    };
 
     // Fonction pour simuler l'impression en PDF
     const handlePrint = () => {
-        // Dans une application réelle, vous utiliseriez une bibliothèque comme jsPDF ou react-to-pdf
-        window.print()
-    }
+        window.print();
+    };
 
     // Fonction pour simuler la sauvegarde
     const handleSave = () => {
-        // Simuler une sauvegarde
         setTimeout(() => {
-            setSavedSuccess(true)
-            setTimeout(() => setSavedSuccess(false), 3000)
-        }, 1000)
-    }
+            setSavedSuccess(true);
+            setTimeout(() => setSavedSuccess(false), 3000);
+        }, 1000);
+    };
 
     // Fonction pour simuler l'envoi par email
     const handleSendEmail = () => {
-        if (!emailTo) return
+        if (!emailTo) return;
 
-        // Simuler l'envoi d'email
         setTimeout(() => {
-            setEmailSent(true)
+            setEmailSent(true);
             setTimeout(() => {
-                setEmailSent(false)
-                setEmailTo("")
-            }, 3000)
-        }, 1000)
-    }
+                setEmailSent(false);
+                setEmailTo("");
+            }, 3000);
+        }, 1000);
+    };
 
     // Fonction pour générer un PDF (simulation)
     const handleGeneratePDF = () => {
-        // Dans une application réelle, vous utiliseriez une bibliothèque comme jsPDF
-        const link = document.createElement("a")
-        link.href = "#"
-        link.setAttribute("download", `Requisition-${requisition.id}.pdf`)
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-    }
+        const link = document.createElement("a");
+        link.href = "#";
+        link.setAttribute("download", `Requisition-${requisition.id}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     return (
-        <div className="container mx-auto py-6">
-            <Card className="w-full">
-                <CardHeader>
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <CardTitle>Approbation Finale - Direction</CardTitle>
-                            <CardDescription>Finaliser et approuver les réquisitions</CardDescription>
-                        </div>
-                        <Badge
-                            variant={
-                                requisition.status === "finalized"
-                                    ? "default"
-                                    : requisition.status === "approved"
-                                        ? "outline"
-                                        : "destructive"
-                            }
-                        >
-                            {requisition.status === "finalized"
-                                ? "Finalisée"
-                                : requisition.status === "approved"
-                                    ? "En attente d'approbation finale"
-                                    : "Rejetée"}
-                        </Badge>
+        <div className="container  py-6">
+            <div className="bg-white rounded-lg shadow-lg p-2">
+                {/* En-tête */}
+                <div className="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 className="text-xl font-semibold">Approbation Finale - Direction</h1>
+                        <p className="text-sm text-gray-600">Finaliser et approuver les réquisitions</p>
                     </div>
-                </CardHeader>
+                    <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${requisition.status === "finalized"
+                            ? "bg-green-100 text-green-800"
+                            : requisition.status === "approved"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                    >
+                        {requisition.status === "finalized"
+                            ? "Finalisée"
+                            : requisition.status === "approved"
+                                ? "En attente d'approbation finale"
+                                : "Rejetée"}
+                    </span>
+                </div>
 
-                <CardContent className="space-y-6">
-                    <Tabs defaultValue="details">
-                        <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="details">Détails de la réquisition</TabsTrigger>
-                            <TabsTrigger value="actions">Actions</TabsTrigger>
-                        </TabsList>
-
-                        <TabsContent value="details" className="space-y-6">
-                            {/* Informations de la réquisition */}
-                            <div ref={printRef}>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/20">
-                                    <div>
-                                        <p className="text-sm font-medium">Numéro de réquisition</p>
-                                        <p className="text-sm">{requisition.id}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium">Demandeur</p>
-                                        <p className="text-sm">{requisition.requestedBy}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium">Département</p>
-                                        <p className="text-sm">{requisition.department}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium">Date de demande</p>
-                                        <p className="text-sm">{requisition.date}</p>
-                                    </div>
-                                    {requisition.approvedBy && (
-                                        <>
-                                            <div>
-                                                <p className="text-sm font-medium">Approuvé par</p>
-                                                <p className="text-sm">{requisition.approvedBy}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-medium">Date d'approbation</p>
-                                                <p className="text-sm">{requisition.approvalDate}</p>
-                                            </div>
-                                        </>
-                                    )}
+                {/* Détails de la réquisition */}
+                <div ref={printRef} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-lg bg-blue-50">
+                        <div>
+                            <p className="text-sm text-blue-700 font-medium">Numéro de réquisition</p>
+                            <p className="text-sm">{requisition.id}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-blue-700  font-medium">Demandeur</p>
+                            <p className="text-sm">{requisition.requestedBy}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-blue-700  font-medium">Département</p>
+                            <p className="text-sm">{requisition.department}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-blue-700  font-medium">Date de demande</p>
+                            <p className="text-sm">{requisition.date}</p>
+                        </div>
+                        {requisition.approvedBy && (
+                            <>
+                                <div>
+                                    <p className="text-sm text-blue-700  font-medium">Approuvé par</p>
+                                    <p className="text-sm">{requisition.approvedBy}</p>
                                 </div>
-
-                                {/* Liste des articles */}
-                                <div className="mt-6">
-                                    <h3 className="text-lg font-medium mb-2">Articles demandés</h3>
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Description</TableHead>
-                                                <TableHead className="text-right">Quantité</TableHead>
-                                                <TableHead className="text-right">Prix unitaire</TableHead>
-                                                <TableHead className="text-right">Prix total</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {requisition.items.map((item) => (
-                                                <TableRow key={item.id}>
-                                                    <TableCell>{item.name}</TableCell>
-                                                    <TableCell className="text-right">{item.quantity}</TableCell>
-                                                    <TableCell className="text-right">{item.unitPrice.toFixed(2)} €</TableCell>
-                                                    <TableCell className="text-right">{item.totalPrice.toFixed(2)} €</TableCell>
-                                                </TableRow>
-                                            ))}
-                                            <TableRow>
-                                                <TableCell colSpan={3} className="text-right font-bold">
-                                                    Montant Total
-                                                </TableCell>
-                                                <TableCell className="text-right font-bold">{requisition.totalAmount.toFixed(2)} €</TableCell>
-                                            </TableRow>
-                                        </TableBody>
-                                    </Table>
+                                <div>
+                                    <p className="text-sm text-blue-700  font-medium">Date d'approbation</p>
+                                    <p className="text-sm">{requisition.approvalDate}</p>
                                 </div>
+                            </>
+                        )}
+                    </div>
 
-                                {/* Commentaires */}
-                                <div className="mt-6">
-                                    <h3 className="text-lg font-medium mb-2">Historique des commentaires</h3>
-                                    <div className="space-y-2 max-h-40 overflow-y-auto p-2 border rounded-lg">
-                                        {requisition.comments.map((comment) => (
-                                            <div key={comment.id} className="p-2 bg-muted/20 rounded">
-                                                <div className="flex justify-between text-sm">
-                                                    <span className="font-medium">{comment.author}</span>
-                                                    <span className="text-muted-foreground">{comment.date}</span>
+                    {/* Liste des articles */}
+                    <div className="mt-6">
+                        <h3 className="text-lg font-medium mb-2">Articles demandés</h3>
+                        <div className="overflow-x-auto border border-gray-200 p-2 rounded-lg">
+                            <table className="min-w-full">
+                                <thead>
+                                    <tr className="bg-gray-300 text-blue-700 ">
+                                        <th className="px-4 py-2 text-left">Description</th>
+                                        <th className="px-4 py-2 text-right">Qté</th>
+                                        <th className="px-4 py-2 text-right">P.U</th>
+                                        <th className="px-4 py-2 text-right">P.T</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {requisition.items.map((item) => (
+                                        <tr key={item.id} className="border-b border-gray-200 odd:bg-gray-100">
+                                            <td className="px-4 py-2">{item.name}</td>
+                                            <td className="px-4 py-2 text-right">{item.quantity}</td>
+                                            <td className="px-4 py-2 text-right">{item.unitPrice.toFixed(2)} €</td>
+                                            <td className="px-4 py-2 text-right">{item.totalPrice.toFixed(2)} €</td>
+                                        </tr>
+                                    ))}
+                                    <tr>
+                                        <td colSpan={3} className="px-4 py-2 text-right font-bold">
+                                            Montant Total
+                                        </td>
+                                        <td className="px-4 py-2 text-right font-bold">{requisition.totalAmount.toFixed(2)} €</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* Historique des commentaires */}
+                    <div className="mt-6">
+                        <h4 className="text-lg font-semibold text-gray-800 mb-4">Historique des commentaires</h4>
+                        <div className="relative">
+                            {/* Ligne verticale de la chronologie */}
+                            <div className="absolute left-0 top-0 h-full w-0.5 bg-gray-200"></div>
+
+                            <ul className="list-none space-y-8 pl-8">
+                                {requisition.comments
+                                    .slice()
+                                    .reverse()
+                                    .map((comment) => (
+                                        <li key={comment.id} className="relative">
+                                            {/* Point de la chronologie */}
+                                            <div className="absolute -left-9 top-1.5 h-3 w-3 rounded-full bg-blue-500 border-2 border-white"></div>
+
+                                            {/* Contenu du commentaire */}
+                                            <div className="bg-gray-50/10 p-4 rounded-lg border border-gray-100">
+                                                <div className="flex items-center justify-between">
+                                                    <h5 className="text-sm font-semibold text-gray-800">
+                                                        {comment.author}
+                                                    </h5>
+                                                    <span className="text-xs text-gray-500">
+                                                        {new Date(comment.date).toLocaleDateString()}
+                                                    </span>
                                                 </div>
-                                                <p className="text-sm mt-1">{comment.text}</p>
+                                                <p className="text-sm mt-2 text-gray-700">
+                                                    {comment.text}
+                                                </p>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
+                                        </li>
+                                    ))}
+                            </ul>
+                        </div>
+                    </div>
 
-                            {/* Ajouter un commentaire */}
-                            <div>
-                                <h3 className="text-lg font-medium mb-2">Ajouter un commentaire</h3>
-                                <Textarea
-                                    placeholder="Entrez votre commentaire ici..."
-                                    value={comment}
-                                    onChange={(e) => setComment(e.target.value)}
-                                    className="min-h-[100px]"
-                                />
-                            </div>
-                        </TabsContent>
+                    {/* Ajouter un commentaire */}
+                    <div>
+                        <h3 className="text-lg font-medium mb-2">Ajouter un commentaire</h3>
+                        <textarea
+                            placeholder="Entrez votre commentaire ici..."
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            className="w-full p-2 border border-gray-100 rounded-lg min-h-[100px]"
+                        />
+                    </div>
+                </div>
 
-                        <TabsContent value="actions" className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Imprimer en PDF */}
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="text-base flex items-center">
-                                            <Printer className="mr-2 h-5 w-5" />
-                                            Imprimer la réquisition
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <p className="text-sm text-muted-foreground">
-                                            Générez un document PDF de cette réquisition pour l'impression ou l'archivage.
-                                        </p>
-                                    </CardContent>
-                                    <CardFooter>
-                                        <Button onClick={handlePrint} className="w-full">
-                                            <Printer className="mr-2 h-4 w-4" />
-                                            Imprimer
-                                        </Button>
-                                    </CardFooter>
-                                </Card>
+                {/* Actions */}
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Imprimer en PDF */}
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Printer className="h-5 w-5 text-blue-500" />
+                            <h3 className="text-base font-medium">Imprimer la réquisition</h3>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-4">
+                            Générez un document PDF de cette réquisition pour l'impression ou l'archivage.
+                        </p>
+                        <button
+                            onClick={handlePrint}
+                            className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                        >
+                            <Printer className="inline-block mr-2 h-4 w-4" />
+                            Imprimer
+                        </button>
+                    </div>
 
-                                {/* Télécharger en PDF */}
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="text-base flex items-center">
-                                            <Download className="mr-2 h-5 w-5" />
-                                            Télécharger en PDF
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <p className="text-sm text-muted-foreground">
-                                            Téléchargez cette réquisition au format PDF sur votre appareil.
-                                        </p>
-                                    </CardContent>
-                                    <CardFooter>
-                                        <Button onClick={handleGeneratePDF} className="w-full">
-                                            <FileText className="mr-2 h-4 w-4" />
-                                            Générer PDF
-                                        </Button>
-                                    </CardFooter>
-                                </Card>
+                    {/* Télécharger en PDF */}
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Download className="h-5 w-5 text-blue-500" />
+                            <h3 className="text-base font-medium">Télécharger en PDF</h3>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-4">
+                            Téléchargez cette réquisition au format PDF sur votre appareil.
+                        </p>
+                        <button
+                            onClick={handleGeneratePDF}
+                            className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                        >
+                            <FileText className="inline-block mr-2 h-4 w-4" />
+                            Générer PDF
+                        </button>
+                    </div>
 
-                                {/* Enregistrer */}
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="text-base flex items-center">
-                                            <Save className="mr-2 h-5 w-5" />
-                                            Enregistrer la réquisition
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <p className="text-sm text-muted-foreground">
-                                            Enregistrez cette réquisition dans le système pour référence future.
-                                        </p>
-                                    </CardContent>
-                                    <CardFooter>
-                                        <Button onClick={handleSave} className="w-full" disabled={savedSuccess}>
-                                            {savedSuccess ? (
-                                                <>
-                                                    <CheckCircle className="mr-2 h-4 w-4" />
-                                                    Enregistré
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Save className="mr-2 h-4 w-4" />
-                                                    Enregistrer
-                                                </>
-                                            )}
-                                        </Button>
-                                    </CardFooter>
-                                </Card>
+                    {/* Enregistrer */}
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Save className="h-5 w-5 text-blue-500" />
+                            <h3 className="text-base font-medium">Enregistrer la réquisition</h3>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-4">
+                            Enregistrez cette réquisition dans le système pour référence future.
+                        </p>
+                        <button
+                            onClick={handleSave}
+                            disabled={savedSuccess}
+                            className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                        >
+                            {savedSuccess ? (
+                                <>
+                                    <CheckCircle className="inline-block mr-2 h-4 w-4" />
+                                    Enregistré
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="inline-block mr-2 h-4 w-4" />
+                                    Enregistrer
+                                </>
+                            )}
+                        </button>
+                    </div>
 
-                                {/* Envoyer par email */}
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="text-base flex items-center">
-                                            <Mail className="mr-2 h-5 w-5" />
-                                            Envoyer par email
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="email">Adresse email</Label>
-                                            <Input
-                                                id="email"
-                                                type="email"
-                                                placeholder="exemple@domaine.com"
-                                                value={emailTo}
-                                                onChange={(e) => setEmailTo(e.target.value)}
-                                            />
-                                        </div>
-                                    </CardContent>
-                                    <CardFooter>
-                                        <Button onClick={handleSendEmail} className="w-full" disabled={!emailTo || emailSent}>
-                                            {emailSent ? (
-                                                <>
-                                                    <CheckCircle className="mr-2 h-4 w-4" />
-                                                    Envoyé
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Mail className="mr-2 h-4 w-4" />
-                                                    Envoyer
-                                                </>
-                                            )}
-                                        </Button>
-                                    </CardFooter>
-                                </Card>
-                            </div>
-                        </TabsContent>
-                    </Tabs>
-                </CardContent>
+                    {/* Envoyer par email */}
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Mail className="h-5 w-5 text-blue-500" />
+                            <h3 className="text-base font-medium">Envoyer par email</h3>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-4">
+                            Envoyez cette réquisition par email à un destinataire.
+                        </p>
+                        <div className="space-y-2">
+                            <input
+                                type="email"
+                                placeholder="exemple@domaine.com"
+                                value={emailTo}
+                                onChange={(e) => setEmailTo(e.target.value)}
+                                className="w-full p-2 border rounded-lg"
+                            />
+                            <button
+                                onClick={handleSendEmail}
+                                disabled={!emailTo || emailSent}
+                                className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                            >
+                                {emailSent ? (
+                                    <>
+                                        <CheckCircle className="inline-block mr-2 h-4 w-4" />
+                                        Envoyé
+                                    </>
+                                ) : (
+                                    <>
+                                        <Mail className="inline-block mr-2 h-4 w-4" />
+                                        Envoyer
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-                <CardFooter className="flex justify-end">
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button disabled={requisition.status === "finalized"}>
-                                <Check className="mr-2 h-4 w-4" />
-                                {requisition.status === "finalized" ? "Réquisition finalisée" : "Finaliser la réquisition"}
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Confirmer la finalisation</DialogTitle>
-                                <DialogDescription>
-                                    Êtes-vous sûr de vouloir finaliser cette réquisition ? Cette action est définitive.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <DialogFooter>
-                                <Button variant="outline" onClick={() => { }}>
-                                    Annuler
-                                </Button>
-                                <Button onClick={finalizeRequisition}>Confirmer</Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-                </CardFooter>
-            </Card>
+                {/* Bouton de finalisation */}
+                <div className="mt-6 flex justify-end">
+                    <button
+                        onClick={finalizeRequisition}
+                        disabled={requisition.status === "finalized"}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                        <Check className="inline-block mr-2 h-4 w-4" />
+                        {requisition.status === "finalized" ? "Réquisition finalisée" : "Finaliser la réquisition"}
+                    </button>
+                </div>
+            </div>
         </div>
-    )
+    );
 }
-
