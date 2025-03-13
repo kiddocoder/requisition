@@ -2,9 +2,6 @@ import type React from "react"
 import {
     CheckCircle,
     CalendarDays,
-    Building,
-    Briefcase,
-    MessageSquare,
     Save,
     Printer,
     Download,

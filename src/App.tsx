@@ -3,8 +3,9 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import "./App.css"
 import React from "react"
 // import Overview from "./pages/Overview"
-import Requisition from "./pages/Requisition";
+// import Requisition from "./pages/Requisition";
 import AppLayout from "./components/layouts/AppLayout"
+import Approvisionnement from "./pages/Approvisionnement";
 
 function App(): React.ReactElement {
   const router = createBrowserRouter([
@@ -14,7 +15,7 @@ function App(): React.ReactElement {
       children: [
         {
           path: "/",
-          element: <Requisition />
+          element: <Approvisionnement />
         }
       ]
     }
