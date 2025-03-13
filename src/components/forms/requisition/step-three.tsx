@@ -52,23 +52,24 @@ export const StepThree: React.FC<StepProps> = ({ formData }) => {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Désignation</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unité</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qté D</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qté R</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fourniseur</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {formData?.items?.map((item: RequisitionItem, index: number) => (
                                 <tr key={index} className="hover:bg-gray-50">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">{index + 1}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                                         <div className="flex items-center">
                                             {item.designation}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.uniteMesure}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.quantiteRequisition}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.quantiteDemande}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">${item.fourniseur}</td>
                                 </tr>
                             ))}

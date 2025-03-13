@@ -1,19 +1,15 @@
-"use client"
-
-import type React from "react"
-
-import { useState } from "react"
-import type { RequisitionModalProps, FormErrors } from "../../../types/requisition"
-import { StepIndicator } from "../step-indicator"
-import { ModalHeader } from "./modal-header"
-import { ModalFooter } from "./modal-footer"
-import { StepOne } from "./step-one"
-import { StepTwo } from "./step-two"
-import { StepThree } from "./step-three"
-import { useNavigate } from "react-router-dom"
+import { useState } from "react";
+import { FormErrors, RequisitionModalProps } from "../../../types/requisition";
+import { StepIndicator } from "../step-indicator";
+import { ModalFooter } from "./modal-footer";
+import { ModalHeader } from "./modal-header";
+import { StepOne } from "./step-one";
+import { StepThree } from "./step-three";
+import { StepTwo } from "./step-two";
+import { useNavigate } from "react-router-dom";
 
 export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) => {
-    const [step, setStep] = useState(3)
+    const [step, setStep] = useState(1)
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [formErrors, setFormErrors] = useState<FormErrors>({})
     const navigate = useNavigate();
@@ -22,6 +18,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) =
         titre: "",
         objet: "",
         date: new Date(Date.now()).toLocaleDateString('fr-FR'),
+        items: [],
     })
 
     const steps = [
@@ -74,6 +71,14 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) =
         setIsFullScreen(!isFullScreen)
     }
 
+    const isNextDisabled = () => {
+        if (step === 1) {
+            return !formData.titre || !formData.objet
+        }
+        // Ajoutez des conditions pour les autres étapes si nécessaire
+        return false
+    }
+
     const renderStep = () => {
         const commonProps = {
             formData,
@@ -122,10 +127,9 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) =
                     onNext={nextStep}
                     onSubmit={handleSubmit}
                     onCancel={onClose}
-                    isNextDisabled={true}
+                    isNextDisabled={isNextDisabled()}
                 />
             </div>
         </div>
     )
 }
-

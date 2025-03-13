@@ -1,9 +1,5 @@
-"use client"
-
-import type React from "react"
-
 import { ArrowLeft, ArrowRight, Send } from "lucide-react"
-import type { ModalFooterProps } from "../../../types/requisition"
+import { ModalFooterProps } from "../../../types/requisition"
 
 export const ModalFooter: React.FC<ModalFooterProps> = ({
     step,
@@ -63,4 +59,3 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({
         </div>
     )
 }
-
