@@ -25,7 +25,7 @@ const Onboarding = () => {
                 </div>
 
                 {/* Contenu central de la bannière */}
-                <div className="max-w-4xl mx-auto text-center px-6 z-10">
+                <div className="mx-auto text-center px-6 z-10">
                     <div className='flex flex-col md:flex-row  items-center py-8 px-8 bg-[#5479f7]'>
                         <div className="animate-fade-in">
                             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">Simplifiez vos demandes de réquisition</h1>

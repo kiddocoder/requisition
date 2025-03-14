@@ -12,6 +12,7 @@ import Requisition from "./pages/Requisition"
 import Comptanility from "./pages/Comptanility"
 import RequisitionApproval from "./components/forms/Direction/RequisitionApproval"
 import Directeur from "./pages/Directeur"
+import SignUp from "./pages/SignUp"
 
 function App(): React.ReactElement {
   const router = createBrowserRouter([
@@ -28,6 +29,10 @@ function App(): React.ReactElement {
     {
       path: "/login",
       element: <Login />
+    },
+    {
+      path: "/inscription",
+      element: <SignUp />
     },
     {
       path: "/",
