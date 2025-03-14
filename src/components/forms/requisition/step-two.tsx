@@ -111,24 +111,24 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                     <Package size={18} className="text-blue-600" />
                     Informations sur l'article
                 </h3>
-
-                <div>
-                    <select
-                        value={currentItem.fourniseur}
-                        onChange={(e) => handleInputChange("fourniseur", e.target.value)}
-                        className={`w-full p-2 border outline-none rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent 
-                ${itemErrors.fourniseur ? "border-red-500" : "border-gray-300"}`}
-                    >
-                        <option value="" selected disabled>Sélectionnez le nom du fourniseur</option>
-                        <option value="Test 1">Test 1</option>
-                        <option value="Test 2">Test 2</option>
-                        <option value="Test 3">Test 3</option>
-                        <option value="Test 4">Test 4</option>
-                    </select>
-                    {itemErrors.uniteMesure && <p className="text-red-500 text-xs mt-1">{itemErrors.uniteMesure}</p>}
-                </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Fourniseur *</label>
+                        <select
+                            value={currentItem.fourniseur}
+                            onChange={(e) => handleInputChange("fourniseur", e.target.value)}
+                            className={`w-full p-2 border mt-1 outline-none rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent 
+                ${itemErrors.fourniseur ? "border-red-500" : "border-gray-300"}`}
+                        >
+                            <option value="" selected disabled>Sélectionnez le nom du fourniseur</option>
+                            <option value="Test 1">Test 1</option>
+                            <option value="Test 2">Test 2</option>
+                            <option value="Test 3">Test 3</option>
+                            <option value="Test 4">Test 4</option>
+                        </select>
+                        {itemErrors.uniteMesure && <p className="text-red-500 text-xs mt-1">{itemErrors.uniteMesure}</p>}
+                    </div>
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Désignation *</label>
                         <input
@@ -140,6 +140,10 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                         />
                         {itemErrors.designation && <p className="text-red-500 text-xs mt-1">{itemErrors.designation}</p>}
                     </div>
+
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Unité de Mesure *</label>
                         <input
@@ -151,9 +155,7 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                         />
                         {itemErrors.uniteMesure && <p className="text-red-500 text-xs mt-1">{itemErrors.uniteMesure}</p>}
                     </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Quantité Demandée *</label>
                         <input
@@ -195,8 +197,8 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
 
             {/* Items Table */}
             {formData?.items?.length > 0 && (
-                <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
-                    <h3 className="font-medium text-gray-800 p-4 border-b flex items-center gap-2">
+                <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
+                    <h3 className="font-medium text-gray-800 p-4 border-b border-gray-100 flex items-center gap-2">
                         <FileText size={18} className="text-blue-600" />
                         Articles ajoutés ({formData?.items.length || 0})
                     </h3>

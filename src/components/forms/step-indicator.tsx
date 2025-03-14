@@ -3,7 +3,7 @@ import type { StepIndicatorProps } from "../../../types/requisition"
 
 export const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, steps }) => {
     return (
-        <div className="px-6 pt-4 bg-white">
+        <div className="px-6 pt-4 pb-4 bg-white">
             <div className="flex items-center justify-between mb-6">
                 {steps.map((step, index) => (
                     <React.Fragment key={step.id}>

@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { Check, Printer, Save, Mail, FileText, Download, CheckCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // Types pour les données
 interface Item {
@@ -65,6 +66,7 @@ export default function RequisitionApproval() {
     const [emailTo, setEmailTo] = useState("");
     const [emailSent, setEmailSent] = useState(false);
     const [savedSuccess, setSavedSuccess] = useState(false);
+    const navigate = useNavigate();
 
     // Référence pour simuler l'impression
     const printRef = useRef<HTMLDivElement>(null);
@@ -87,6 +89,7 @@ export default function RequisitionApproval() {
             ],
         }));
         setComment("");
+        setTimeout(() => navigate("/accueil"), 1000);
     };
 
     // Fonction pour simuler l'impression en PDF
@@ -126,8 +129,8 @@ export default function RequisitionApproval() {
     };
 
     return (
-        <div className="container  py-6">
-            <div className="bg-white rounded-lg shadow-lg p-2">
+        <div className="container mx-auto  max-w-5xl py-6">
+            <div className="bg-white rounded-lg  p-4">
                 {/* En-tête */}
                 <div className="flex justify-between items-center mb-6">
                     <div>

@@ -13,6 +13,12 @@ export default function SignUp() {
     const [success, setSuccess] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
 
+    const enterprises = [
+        { id: "1", name: "DAC" },
+
+
+    ]
+
     const handleSignUp = async (e) => {
         e.preventDefault()
         setLoading(true)
@@ -142,15 +148,20 @@ export default function SignUp() {
                                 Entreprise
                             </label>
                             <div className="relative">
-                                <input
+                                <select
                                     id="enterprise"
-                                    type="text"
-                                    placeholder="Nom de l'entreprise"
                                     className="w-full p-2.5 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     value={enterprise}
                                     onChange={(e) => setEnterprise(e.target.value)}
                                     required
-                                />
+                                >
+                                    <option value="" selected disabled>Nom de l'entreprise</option>
+                                    {enterprises.map((enterprise) => (
+                                        <option key={enterprise.id} value={enterprise.id}>
+                                            {enterprise.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
 

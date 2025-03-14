@@ -29,7 +29,7 @@ export default function Login() {
 
                 // Rediriger après connexion réussie
                 setTimeout(() => {
-                    navigate("/requisition")
+                    navigate("/accueil")
                 }, 1000)
             } else {
                 throw new Error("Veuillez remplir tous les champs")
@@ -90,7 +90,7 @@ export default function Login() {
                                     Mot de passe
                                 </label>
                                 <Link
-                                    to="/password-reset"
+                                    to="#"
                                     className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
                                 >
                                     Mot de passe oublié?

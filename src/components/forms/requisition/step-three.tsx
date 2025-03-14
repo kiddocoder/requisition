@@ -6,6 +6,8 @@ import {
     Printer,
     Download,
     Share2,
+    Building,
+    Briefcase,
 } from "lucide-react"
 import type { StepProps, RequisitionItem } from "../../../types/requisition"
 
@@ -33,14 +35,14 @@ export const StepThree: React.FC<StepProps> = ({ formData }) => {
                                     <CalendarDays size={14} />
                                     <span>{formData.date}</span>
                                 </div>
-                                {/* <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-1">
                                     <Building size={14} />
-                                    <span>{formData.department}</span>
-                                </div> */}
-                                {/* <div className="flex items-center gap-1">
+                                    <span>DAC</span>
+                                </div>
+                                <div className="flex items-center gap-1">
                                     <Briefcase size={14} />
-                                    <span>{formData.supplier}</span>
-                                </div> */}
+                                    <span>{formData.fourniseur}</span>
+                                </div>
                             </div>
                         </div>
                         <div>
@@ -70,7 +72,7 @@ export const StepThree: React.FC<StepProps> = ({ formData }) => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.uniteMesure}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.quantiteDemande}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm">${item.fourniseur}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.fourniseur}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -95,13 +97,6 @@ export const StepThree: React.FC<StepProps> = ({ formData }) => {
                     type="button"
                     className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors flex items-center gap-2"
                 >
-                    <Save size={18} />
-                    Enregistrer comme brouillon
-                </button>
-                <button
-                    type="button"
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors flex items-center gap-2"
-                >
                     <Printer size={18} />
                     Imprimer
                 </button>
@@ -111,13 +106,6 @@ export const StepThree: React.FC<StepProps> = ({ formData }) => {
                 >
                     <Download size={18} />
                     Exporter en PDF
-                </button>
-                <button
-                    type="button"
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors flex items-center gap-2"
-                >
-                    <Share2 size={18} />
-                    Partager
                 </button>
             </div>
         </div>

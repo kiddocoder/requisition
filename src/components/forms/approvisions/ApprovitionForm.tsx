@@ -75,7 +75,7 @@ const priorities = [
     }
 ]
 
-function ApprovitionForm() {
+function ApprovitionForm({ onClose }) {
     // Étapes du formulaire
     const steps = [
         { id: 1, label: "Sélection des articles" },
@@ -86,7 +86,7 @@ function ApprovitionForm() {
 
     // États du formulaire
     const [currentStep, setCurrentStep] = useState(1)
-    const [selectedRequisition, setSelectedRequisition] = useState("")
+    const [selectedRequisition, setSelectedRequisition] = useState(availableRequisitions[0].id)
     const [selectedItems, setSelectedItems] = useState<RequisitionItem[]>([])
     const [currentEditItem, setCurrentEditItem] = useState<string | null>(null)
     const [transactionType, setTransactionType] = useState("stock")
@@ -239,6 +239,7 @@ function ApprovitionForm() {
     // Annuler la réquisition
     const handleCancel = () => {
         showModalAlert("Confirmation", "Êtes-vous sûr de vouloir annuler cette demande d'approvisionnement?", "confirm")
+
     }
 
     // Confirmer l'annulation
@@ -255,6 +256,7 @@ function ApprovitionForm() {
         setPriority("normal")
         setComment("")
         setAttachments([])
+        setTimeout(() => onClose(), 1000)
     }
 
     // Rendu des étapes du formulaire
@@ -263,23 +265,6 @@ function ApprovitionForm() {
             case 1:
                 return (
                     <div className="p-6 bg-white rounded-b-lg shadow-md">
-                        <div className="mb-6">
-                            <label htmlFor="requisition" className="block text-sm font-medium text-blue-900 mb-2">
-                                Sélectionner une demande de réquisition
-                            </label>
-                            <select
-                                id="requisition"
-                                className="w-full p-2.5 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value={selectedRequisition}
-                                onChange={handleRequisitionChange}
-                            >
-                                <option value="">-- Sélectionner une réquisition --</option>
-                                {availableRequisitions.map(req => (
-                                    <option key={req.id} value={req.id}>{req.name}</option>
-                                ))}
-                            </select>
-                        </div>
-
                         {selectedRequisition && (
                             <div className="border border-blue-200 rounded-lg p-4 mb-6">
                                 <h3 className="text-lg font-medium text-blue-800 mb-4">Articles disponibles</h3>
@@ -550,7 +535,7 @@ function ApprovitionForm() {
                 return (
                     <div className="p-6 bg-white rounded-b-lg shadow-md">
 
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
+                        <div className="bg-green-50 mb-4 border border-green-200 rounded-lg p-4 flex items-start gap-3">
                             <CheckCircle className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
                             <div>
                                 <p className="text-sm text-green-700 font-medium">Prêt à soumettre</p>
@@ -737,7 +722,8 @@ function ApprovitionForm() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto bg-gray-50 rounded-lg shadow-lg overflow-hidden">
+        <div className="max-w-8xl max-h-[95%] mx-auto bg-gray-50 rounded-lg shadow-lg overflow-y-scroll">
+
             <StepIndicator currentStep={currentStep} steps={steps} />
 
             {renderStepContent()}

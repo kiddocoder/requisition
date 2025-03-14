@@ -134,8 +134,8 @@ export default function RequisitionAccounter() {
     };
 
     return (
-        <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="container mx-auto mb-4 max-w-5xl py-6 px-4 mt-4 border border-gray-100 rounded-lg sm:px-6 lg:px-8">
+            <div className="bg-white p-4">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Révision de Réquisition - Service Comptabilité</h3>
                 <p className="text-sm text-gray-600">Examiner et approuver les demandes de réquisition</p>
 

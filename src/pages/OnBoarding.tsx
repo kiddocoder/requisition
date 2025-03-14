@@ -3,11 +3,10 @@ import { Splide, SplideSlide } from '@splidejs/react-splide';
 import '@splidejs/splide/dist/css/splide.min.css';
 import BannerImage from "../assets/purchaserequisition.png";
 import testimonials from "../stores/testimonials";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Onboarding = () => {
-    // Données des témoignages avec des avatars réels
-
+    const navigate = useNavigate()
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-50">
@@ -30,7 +29,9 @@ const Onboarding = () => {
                         <div className="animate-fade-in">
                             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">Simplifiez vos demandes de réquisition</h1>
                             <p className="text-xl md:text-2xl text-blue-100 mb-10">Une plateforme intuitive pour gérer l'ensemble du processus d'achat, de la demande à l'approbation</p>
-                            <button className="px-8 py-4 bg-white text-indigo-600 rounded-xl shadow-xl hover:shadow-2xl transition-all text-lg font-semibold hover:bg-indigo-50">
+                            <button
+                                onClick={() => navigate("/inscription")}
+                                className="px-8 py-4 bg-white text-indigo-600 rounded-xl shadow-xl hover:shadow-2xl transition-all text-lg font-semibold hover:bg-indigo-50">
                                 Commencer maintenant
                             </button>
                         </div>

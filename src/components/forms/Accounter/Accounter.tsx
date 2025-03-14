@@ -10,6 +10,7 @@ import {
     Clock,
     Eye,
 } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
 
 interface Requisition {
     id: number;
@@ -19,10 +20,9 @@ interface Requisition {
     status: string;
 }
 
-function Approvisionnement() {
-    const [isModalOpen, setIsModalOpen] = useState<Boolean>(false)
+function Accounter() {
     const [requisitions, setRequisitions] = useState<Array<Requisition>>([])
-
+    const navigate = useNavigate()
 
     useEffect(() => {
         setRequisitions([
@@ -32,6 +32,9 @@ function Approvisionnement() {
         ])
     }, [])
 
+    const handleView = (id: number) => {
+        navigate(`/comptability/requisition/${id}`)
+    }
 
     return (
         <>
@@ -132,7 +135,7 @@ function Approvisionnement() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <button
-                                                onClick={() => setIsModalOpen(true)}
+                                                onClick={() => handleView(req.id)}
                                                 className="cursor-pointer text-blue-600 hover:text-blue-800 mr-3">
                                                 <Eye size={16} />
                                             </button>
@@ -156,19 +159,9 @@ function Approvisionnement() {
                     )}
                 </div>
             </main>
-
-            {isModalOpen && (
-                <div
-                    className={`fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-300 p-4`}
-                >
-
-                    <ApprovitionForm onClose={() => setIsModalOpen(false)} />
-                </div>
-            )
-            }
         </>
     )
 }
 
-export default Approvisionnement;
+export default Accounter;
 
