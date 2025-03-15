@@ -17,7 +17,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) =
     const [formData, setFormData] = useState({
         titre: "",
         objet: "",
-        date: new Date(Date.now()).toLocaleDateString('fr-FR'),
+        date: new Date(Date.now()),
         items: [],
     })
 
@@ -33,7 +33,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) =
         if (currentStep === 1) {
             if (!formData.titre) newErrors.titre = "Le titre est requis"
             if (!formData.objet) newErrors.objet = "L'objet de la réquisition est requis"
-            // if (!formData.date) newErrors.date = "Le département est requis"
+            if (!formData.date) newErrors.date = "La Date de demande est requise"
 
             if (Object.keys(newErrors).length > 0) {
                 setFormErrors(newErrors)

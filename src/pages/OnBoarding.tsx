@@ -27,7 +27,7 @@ const Onboarding = () => {
                 <div className="mx-auto text-center px-6 z-10">
                     <div className='flex flex-col md:flex-row  items-center py-8 px-8 bg-[#5479f7]'>
                         <div className="animate-fade-in">
-                            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">Simplifiez vos demandes de réquisition</h1>
+                            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Simplifiez vos demandes de réquisition</h1>
                             <p className="text-xl md:text-2xl text-blue-100 mb-10">Une plateforme intuitive pour gérer l'ensemble du processus d'achat, de la demande à l'approbation</p>
                             <button
                                 onClick={() => navigate("/inscription")}

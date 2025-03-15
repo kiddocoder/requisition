@@ -7,7 +7,10 @@ export default function SignUp() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
+
     const [enterprise, setEnterprise] = useState("")
+    const [post, setPost] = useState("")
+
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const [success, setSuccess] = useState(false)
@@ -15,8 +18,14 @@ export default function SignUp() {
 
     const enterprises = [
         { id: "1", name: "DAC" },
+    ]
 
-
+    const posts = [
+        { id: "1", name: "Service comptabilite" },
+        { id: "2", name: "Demandeur" },
+        { id: "3", name: "Service d'approvisionnement" },
+        { id: "4", name: "Service technique" },
+        { id: "5", name: "Direction d'approbation" },
     ]
 
     const handleSignUp = async (e) => {
@@ -159,6 +168,28 @@ export default function SignUp() {
                                     {enterprises.map((enterprise) => (
                                         <option key={enterprise.id} value={enterprise.id}>
                                             {enterprise.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label htmlFor="post" className="block text-sm font-medium text-blue-900 mb-1">
+                                Votre post
+                            </label>
+                            <div className="relative">
+                                <select
+                                    id="post"
+                                    className="w-full p-2.5 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    value={post}
+                                    onChange={(e) => setPost(e.target.value)}
+                                    required
+                                >
+                                    <option value="" selected disabled>Votre post dans l'entreprise</option>
+                                    {posts.map((post) => (
+                                        <option key={post.id} value={post.id}>
+                                            {post.name}
                                         </option>
                                     ))}
                                 </select>
