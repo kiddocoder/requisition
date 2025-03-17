@@ -1,64 +1,73 @@
-import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { Eye, EyeOff, Lock, Mail, AlertCircle, CheckCircle2 } from "lucide-react"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react";
+import StepOneSignup from "../components/forms/signup/StepOneSignup";
+import StepTwoSignup from "../components/forms/signup/StepTwoSignup";
 
 export default function SignUp() {
-    const navigate = useNavigate()
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
-    const [confirmPassword, setConfirmPassword] = useState("")
+    const navigate = useNavigate();
+    const [step, setStep] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState(false);
 
-    const [enterprise, setEnterprise] = useState("")
-    const [post, setPost] = useState("")
+    const [formData, setFormData] = useState({
+        username: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        enterprise: "",
+        post: "",
+    });
 
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState("")
-    const [success, setSuccess] = useState(false)
-    const [showPassword, setShowPassword] = useState(false)
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
 
-    const enterprises = [
-        { id: "1", name: "DAC" },
-    ]
-
-    const posts = [
-        { id: "1", name: "Service comptabilite" },
-        { id: "2", name: "Demandeur" },
-        { id: "3", name: "Service d'approvisionnement" },
-        { id: "4", name: "Service technique" },
-        { id: "5", name: "Direction d'approbation" },
-    ]
-
-    const handleSignUp = async (e) => {
-        e.preventDefault()
-        setLoading(true)
-        setError("")
+    const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setLoading(true);
+        setError("");
 
         try {
             // Simuler un appel API
-            await new Promise((resolve) => setTimeout(resolve, 1500))
+            await new Promise((resolve) => setTimeout(resolve, 1500));
 
             // Vérification simple (à remplacer par un vrai appel API)
-            if (email && password && confirmPassword && enterprise) {
-                if (password !== confirmPassword) {
-                    throw new Error("Les mots de passe ne correspondent pas")
+            if (formData.email && formData.password && formData.confirmPassword && formData.enterprise) {
+                if (formData.password !== formData.confirmPassword) {
+                    throw new Error("Les mots de passe ne correspondent pas");
                 }
-                console.log("Inscription réussie!", { email, enterprise })
-                setSuccess(true)
+                console.log("Inscription réussie!", { email: formData.email, enterprise: formData.enterprise });
+                setSuccess(true);
 
                 // Rediriger après inscription réussie
                 setTimeout(() => {
-                    navigate("/login")
-                }, 1000)
+                    navigate("/login");
+                }, 1000);
             } else {
-                throw new Error("Veuillez remplir tous les champs")
+                throw new Error("Veuillez remplir tous les champs");
             }
-        } catch (err) {
-            console.error("Erreur d'inscription:", err)
-            setError(err.message || "Une erreur est survenue lors de l'inscription")
+        } catch (err: any) {
+            console.error("Erreur d'inscription:", err);
+            setError(err.message || "Une erreur est survenue lors de l'inscription");
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
+
+    const handleNextStep = () => {
+        if (step === 1) {
+            if (!formData.username || !formData.enterprise || !formData.post) {
+                setError("Veuillez remplir tous les champs");
+                return;
+            }
+            setStep(2);
+        }
+    };
+
+    const handlePreviousStep = () => setStep(step - 1);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-blue-50 px-4 py-12 sm:px-6 lg:px-8">
@@ -84,140 +93,44 @@ export default function SignUp() {
                     )}
 
                     <form onSubmit={handleSignUp} className="space-y-5">
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-blue-900 mb-1">
-                                Adresse e-mail
-                            </label>
-                            <div className="relative">
-                                <Mail className="absolute left-3 top-3 h-5 w-5 text-blue-400" />
-                                <input
-                                    id="email"
-                                    type="email"
-                                    placeholder="nom@entreprise.com"
-                                    className="pl-10 w-full p-2.5 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
-                            </div>
-                        </div>
+                        {step === 1 && <StepOneSignup formData={formData} handleChange={handleChange} />}
+                        {step === 2 && <StepTwoSignup formData={formData} handleChange={handleChange} />}
 
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-blue-900 mb-1">
-                                Mot de passe
-                            </label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-3 h-5 w-5 text-blue-400" />
-                                <input
-                                    id="password"
-                                    type={showPassword ? "text" : "password"}
-                                    className="pl-10 pr-10 w-full p-2.5 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
+                        <div className="flex items-center justify-between">
+                            {step > 1 && (
                                 <button
                                     type="button"
-                                    className="absolute right-3 top-3 text-blue-400 hover:text-blue-600"
-                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="flex items-center text-blue-600 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                    onClick={handlePreviousStep}
                                 >
-                                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                    <ArrowLeft className="h-4 w-4 mr-2" />
+                                    Précédent
                                 </button>
-
-                            </div>
-                        </div>
-
-                        <div>
-                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-blue-900 mb-1">
-                                Confirmer le mot de passe
-                            </label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-3 h-5 w-5 text-blue-400" />
-                                <input
-                                    id="confirmPassword"
-                                    type={showPassword ? "text" : "password"}
-                                    type="password"
-                                    className="pl-10 pr-10 w-full p-2.5 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    required
-                                />
+                            )}
+                            {step < 2 ? (
                                 <button
                                     type="button"
-                                    className="absolute right-3 top-3 text-blue-400 hover:text-blue-600"
-                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="w-full py-2.5 px-4 rounded-md text-white font-medium bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                    onClick={handleNextStep}
                                 >
-                                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                    Suivant
                                 </button>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label htmlFor="enterprise" className="block text-sm font-medium text-blue-900 mb-1">
-                                Entreprise
-                            </label>
-                            <div className="relative">
-                                <select
-                                    id="enterprise"
-                                    className="w-full p-2.5 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={enterprise}
-                                    onChange={(e) => setEnterprise(e.target.value)}
-                                    required
+                            ) : (
+                                <button
+                                    type="submit"
+                                    className={`py-2.5 px-4 rounded-md text-white font-medium ${loading
+                                        ? "bg-blue-400 cursor-not-allowed"
+                                        : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                        }`}
+                                    disabled={loading}
                                 >
-                                    <option value="" selected disabled>Nom de l'entreprise</option>
-                                    {enterprises.map((enterprise) => (
-                                        <option key={enterprise.id} value={enterprise.id}>
-                                            {enterprise.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                                    {loading ? "En cours..." : "S'inscrire"}
+                                </button>
+                            )}
                         </div>
-
-                        <div>
-                            <label htmlFor="post" className="block text-sm font-medium text-blue-900 mb-1">
-                                Votre post
-                            </label>
-                            <div className="relative">
-                                <select
-                                    id="post"
-                                    className="w-full p-2.5 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={post}
-                                    onChange={(e) => setPost(e.target.value)}
-                                    required
-                                >
-                                    <option value="" selected disabled>Votre post dans l'entreprise</option>
-                                    {posts.map((post) => (
-                                        <option key={post.id} value={post.id}>
-                                            {post.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-
-                        <button
-                            type="submit"
-                            className={`w-full py-2.5 px-4 rounded-md text-white font-medium ${loading
-                                ? "bg-blue-400 cursor-not-allowed"
-                                : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                }`}
-                            disabled={loading}
-                        >
-                            {loading ? "Inscription en cours..." : "S'inscrire"}
-                        </button>
                     </form>
-
-                    <div className="mt-6 text-center text-sm">
-                        <p className="text-blue-700">
-                            Vous avez déjà un compte?{" "}
-                            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-800 hover:underline">
-                                Se connecter
-                            </Link>
-                        </p>
-                    </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }

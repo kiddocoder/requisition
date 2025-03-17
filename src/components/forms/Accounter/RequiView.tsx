@@ -55,6 +55,36 @@ export default function RequisitionAccounter() {
     const [requisition, setRequisition] = useState<Requisition>(sampleRequisition);
     const [comment, setComment] = useState("");
     const navigate = useNavigate();
+    const [selectedCaisse, setSelectedCaisse] = useState<string>("");
+    const [selectedVoiture, setSelectedVoiture] = useState<string>("");
+
+    const voitures = [{
+        id: "1",
+        marque: "Toyota",
+        name: "Camry",
+        couleur: "Noir",
+        immatriculation: "ABC123"
+    },
+    {
+        id: "2",
+        marque: "Honda",
+        name: "Civic",
+        couleur: "Blanc",
+        immatriculation: "DEF456"
+    },
+    {
+        id: "3",
+        marque: "Ford",
+        name: "Mustang",
+        couleur: "Rouge",
+        immatriculation: "GHI789"
+    }
+    ];
+    const caisses = [
+        { id: "1", name: "Caisse 1", description: "Caisse de stockage" },
+        { id: "2", name: "Caisse 2", description: "Caisse de stockage" },
+        { id: "3", name: "Caisse 3", description: "Caisse de stockage" },
+    ];
 
     // Fonction pour approuver la réquisition
     const approveRequisition = () => {
@@ -238,6 +268,47 @@ export default function RequisitionAccounter() {
                         </ul>
                     </div>
                 </div>
+
+                <div className="grid grid-cols-2 gap-2">
+
+                    {/* choix de la caisse*/}
+                    <div className="mt-6">
+                        <h4 className="text-lg font-semibold text-gray-800 mb-4">Choix de la caisse</h4>
+                        <select
+                            className="w-full p-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500"
+                            value={selectedCaisse}
+                            onChange={(e) => setSelectedCaisse(e.target.value)}
+                        >
+                            <option value="">Choisissez une caisse</option>
+                            {caisses.map((caisse) => (
+                                <option key={caisse.id} value={caisse.id}>
+                                    {caisse.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/*choix de la voiture*/}
+                    <div className="mt-6">
+                        <h4 className="text-lg font-semibold text-gray-800 mb-4">Choix de la voiture</h4>
+                        <select
+                            className="w-full p-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500"
+                            value={selectedVoiture}
+                            onChange={(e) => setSelectedVoiture(e.target.value)}
+                        >
+                            <option value="">Choisissez une voiture</option>
+                            {voitures.map((voiture) => (
+                                <option key={voiture.id} value={voiture.id}>
+                                    {voiture.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+
+                </div>
+
+
 
                 {/* Ajouter un commentaire */}
                 <div className="mt-6">

@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Check, Printer, Save, Mail, FileText, Download, CheckCircle } from "lucide-react";
+import { Check, Printer, Save, Mail, FileText, Download, CheckCircle, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 // Types pour les données
@@ -286,101 +286,41 @@ export default function RequisitionApproval() {
                             Imprimer
                         </button>
                     </div>
-
-                    {/* Télécharger en PDF */}
+                    {/* Retourner vers (demande requisiton,service comptabilite,service d'approvisionnement ...) ...*/}
                     <div className="bg-white p-4 rounded-lg shadow-sm">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Download className="h-5 w-5 text-blue-500" />
-                            <h3 className="text-base font-medium">Télécharger en PDF</h3>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-4">
-                            Téléchargez cette réquisition au format PDF sur votre appareil.
-                        </p>
+                        <select
+                            className="w-full p-2.5 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                            mb-4
+                            "
+                            value={""}
+                            onChange={(e) => setSelectedOption(e.target.value)
+                            }>
+                            <option value="">Retourner vers</option>
+                            <option value="demandeRequisition">Demande de Requisition</option>
+                            <option value="serviceComptabilite">Service Comptabilite</option>
+                            <option value="serviceApprovisionnement">Service d'Approvisionnement</option>
+                            <option value="serviceDirection">Service Direction</option>
+                        </select>
                         <button
-                            onClick={handleGeneratePDF}
+                            onClick={() => void (null)}
                             className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
                         >
-                            <FileText className="inline-block mr-2 h-4 w-4" />
-                            Générer PDF
+                            <ArrowLeft className="inline-block mr-2 h-4 w-4" />
+                            Retourner
                         </button>
                     </div>
 
-                    {/* Enregistrer */}
-                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Save className="h-5 w-5 text-blue-500" />
-                            <h3 className="text-base font-medium">Enregistrer la réquisition</h3>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-4">
-                            Enregistrez cette réquisition dans le système pour référence future.
-                        </p>
+                    {/* Bouton de finalisation */}
+                    <div className="mt-6 flex justify-end">
                         <button
-                            onClick={handleSave}
-                            disabled={savedSuccess}
-                            className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                            onClick={finalizeRequisition}
+                            disabled={requisition.status === "finalized"}
+                            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
                         >
-                            {savedSuccess ? (
-                                <>
-                                    <CheckCircle className="inline-block mr-2 h-4 w-4" />
-                                    Enregistré
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="inline-block mr-2 h-4 w-4" />
-                                    Enregistrer
-                                </>
-                            )}
+                            <Check className="inline-block mr-2 h-4 w-4" />
+                            {requisition.status === "finalized" ? "Réquisition finalisée" : "Finaliser la réquisition"}
                         </button>
                     </div>
-
-                    {/* Envoyer par email */}
-                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Mail className="h-5 w-5 text-blue-500" />
-                            <h3 className="text-base font-medium">Envoyer par email</h3>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-4">
-                            Envoyez cette réquisition par email à un destinataire.
-                        </p>
-                        <div className="space-y-2">
-                            <input
-                                type="email"
-                                placeholder="exemple@domaine.com"
-                                value={emailTo}
-                                onChange={(e) => setEmailTo(e.target.value)}
-                                className="w-full p-2 border rounded-lg"
-                            />
-                            <button
-                                onClick={handleSendEmail}
-                                disabled={!emailTo || emailSent}
-                                className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-                            >
-                                {emailSent ? (
-                                    <>
-                                        <CheckCircle className="inline-block mr-2 h-4 w-4" />
-                                        Envoyé
-                                    </>
-                                ) : (
-                                    <>
-                                        <Mail className="inline-block mr-2 h-4 w-4" />
-                                        Envoyer
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Bouton de finalisation */}
-                <div className="mt-6 flex justify-end">
-                    <button
-                        onClick={finalizeRequisition}
-                        disabled={requisition.status === "finalized"}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-                    >
-                        <Check className="inline-block mr-2 h-4 w-4" />
-                        {requisition.status === "finalized" ? "Réquisition finalisée" : "Finaliser la réquisition"}
-                    </button>
                 </div>
             </div>
         </div>

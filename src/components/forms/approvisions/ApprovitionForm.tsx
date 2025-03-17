@@ -80,10 +80,14 @@ function ApprovitionForm({ onClose }) {
     const steps = [
         { id: 1, label: "Sélection des articles" },
         { id: 2, label: "Prix et détails" },
-        { id: 3, label: "Transaction et pièces jointes" },
-        { id: 4, label: "Confirmation" }
+        { id: 3, label: "Confirmation" }
     ]
-
+    const suppliers = [
+        { id: "1", name: "Supplier 1" },
+        { id: "2", name: "Supplier 2" },
+        { id: "3", name: "Supplier 3" },
+        { id: "4", name: "Supplier 4" },
+    ]
     // États du formulaire
     const [currentStep, setCurrentStep] = useState(1)
     const [selectedRequisition, setSelectedRequisition] = useState(availableRequisitions[0].id)
@@ -291,7 +295,7 @@ function ApprovitionForm({ onClose }) {
                                                                 onClick={() => handleAddItem(item)}
                                                                 className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700"
                                                             >
-                                                                <Plus size={16} className="mr-1" /> Ajouter
+                                                                <Plus size={16} className="mr-1" />
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -311,6 +315,9 @@ function ApprovitionForm({ onClose }) {
                                             <tr>
                                                 <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Article</th>
                                                 <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Quantité</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Stock disponible</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Fourniseur</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Type de Transaction</th>
                                                 <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Action</th>
                                             </tr>
                                         </thead>
@@ -319,12 +326,44 @@ function ApprovitionForm({ onClose }) {
                                                 <tr key={item.id} className="hover:bg-blue-50">
                                                     <td className="px-4 py-3 text-sm text-gray-700">{item.name}</td>
                                                     <td className="px-4 py-3 text-sm text-gray-700">{item.quantity}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-700">0</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-700">
+                                                        <select
+                                                            value={item.supplier}
+                                                            onChange={(e) => handleSupplierChange(item.id, e.target.value)}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                                        >
+                                                            <option value="">Choisissez un fournisseur</option>
+                                                            {suppliers?.map(supplier => (
+                                                                <option key={supplier.id} value={supplier.id}>
+                                                                    {supplier.name}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-700">
+                                                        <div>
+                                                            {transactionTypes.map(type => (
+                                                                <label key={type.id} className="inline-flex items-center mr-4">
+                                                                    <input
+                                                                        type="radio"
+                                                                        name={`transactionType-${item.id}`}
+                                                                        value={type.type}
+                                                                        checked={item.transactionType === type.type}
+                                                                        onChange={(e) => handleTransactionTypeChange(item.id, e.target.value)}
+                                                                    />
+                                                                    <span className="ml-2">{type.name}</span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    </td>
                                                     <td className="px-4 py-3 text-sm">
+
                                                         <button
                                                             onClick={() => handleRemoveItem(item.id)}
                                                             className="inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700"
                                                         >
-                                                            <Trash2 size={16} className="mr-1" /> Retirer
+                                                            <Trash2 size={16} className="mr-1" />
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -404,134 +443,135 @@ function ApprovitionForm({ onClose }) {
                                 ))}
                             </div>
                         </div>
-                    </div>
-                )
 
-            case 3:
-                return (
-                    <div className="p-6 bg-white rounded-b-lg shadow-md">
-                        <div className="grid grid-cols-1 gap-6">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Type de Transaction</label>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                    {transactionTypes.map(type => {
-                                        let Icon
-                                        switch (type.icon) {
-                                            case "Package":
-                                                Icon = Package
-                                                break
-                                            case "CreditCard":
-                                                Icon = CreditCard
-                                                break
-                                            case "DollarSign":
-                                                Icon = DollarSign
-                                                break
-                                            default:
-                                                Icon = Package
-                                        }
-
-                                        return (
-                                            <label key={type.id} className="flex items-center p-3 border border-gray-100 rounded-md hover:bg-blue-50 transition-colors cursor-pointer">
-                                                <input
-                                                    type="radio"
-                                                    checked={transactionType === type.type}
-                                                    onChange={() => setTransactionType(type.type)}
-                                                    className="w-4 h-4 text-blue-600"
-                                                />
-                                                <div className="ml-2">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <Icon size={16} className={`text-${type.type === 'stock' ? 'blue' : type.type === 'credit' ? 'orange' : 'green'}-600`} />
-                                                        <span className="text-sm font-medium">{type.name}</span>
-                                                    </div>
-                                                    <p className="text-xs text-gray-500 mt-1">{type.description}</p>
-                                                </div>
-                                            </label>
-                                        )
-                                    })}
-                                </div>
+                        <div>
+                            <h3 className="text-lg font-medium text-blue-800 mb-4">Pièces jointes</h3>
+                            <div className="mb-4">
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleFileChange}
+                                    className="hidden"
+                                    multiple
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                >
+                                    <FileText size={18} className="mr-2" /> Ajouter des fichiers
+                                </button>
                             </div>
 
-                            {transactionType === "credit" && (
-                                <div className="p-4 border rounded-md bg-orange-50 border-orange-200">
-                                    <h4 className="text-sm font-medium text-orange-800 mb-2 flex items-center gap-2">
-                                        <AlertCircle size={16} />
-                                        Option de paiement anticipé
-                                    </h4>
-                                    <div className="flex flex-col">
-                                        <label className="text-sm text-gray-700 mb-1">Montant d'avance (%)</label>
-                                        <input
-                                            type="range"
-                                            min="0"
-                                            max="50"
-                                            step="5"
-                                            value={advancePayment}
-                                            onChange={(e) => setAdvancePayment(parseInt(e.target.value))}
-                                            className="w-full accent-orange-500"
-                                        />
-                                        <div className="flex justify-between text-xs text-gray-500 mt-1">
-                                            <span>0%</span>
-                                            <span>Paiement d'avance: {advancePayment}%</span>
-                                            <span>50%</span>
-                                        </div>
-                                    </div>
+                            {attachments.length > 0 && (
+                                <div className="space-y-2 mb-4">
+                                    <p className="text-sm font-medium text-blue-700">Fichiers ajoutés:</p>
+                                    <ul className="space-y-2">
+                                        {attachments.map((file, index) => (
+                                            <li key={index} className="flex items-center justify-between p-2 bg-blue-50 rounded-md">
+                                                <span className="text-sm text-gray-700 truncate max-w-[200px]">{file.name}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveAttachment(index)}
+                                                    className="text-red-600 hover:text-red-800"
+                                                >
+                                                    <X size={16} />
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
                             )}
-
-                            <div>
-                                <h3 className="text-lg font-medium text-blue-800 mb-4">Pièces jointes</h3>
-                                <div className="mb-4">
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        onChange={handleFileChange}
-                                        className="hidden"
-                                        multiple
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => fileInputRef.current?.click()}
-                                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                    >
-                                        <FileText size={18} className="mr-2" /> Ajouter des fichiers
-                                    </button>
-                                </div>
-
-                                {attachments.length > 0 && (
-                                    <div className="space-y-2 mb-4">
-                                        <p className="text-sm font-medium text-blue-700">Fichiers ajoutés:</p>
-                                        <ul className="space-y-2">
-                                            {attachments.map((file, index) => (
-                                                <li key={index} className="flex items-center justify-between p-2 bg-blue-50 rounded-md">
-                                                    <span className="text-sm text-gray-700 truncate max-w-[200px]">{file.name}</span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleRemoveAttachment(index)}
-                                                        className="text-red-600 hover:text-red-800"
-                                                    >
-                                                        <X size={16} />
-                                                    </button>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div>
-                                <h3 className="text-lg font-medium text-blue-800 mb-2">Commentaire</h3>
-                                <textarea
-                                    value={comment}
-                                    onChange={(e) => setComment(e.target.value)}
-                                    className="w-full p-3 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    rows={4}
-                                    placeholder="Ajoutez un commentaire ou des instructions supplémentaires..."
-                                ></textarea>
-                            </div>
                         </div>
+
+                        <div>
+                            <h3 className="text-lg font-medium text-blue-800 mb-2">Commentaire</h3>
+                            <textarea
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                className="w-full p-3 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                rows={4}
+                                placeholder="Ajoutez un commentaire ou des instructions supplémentaires..."
+                            ></textarea>
+                        </div>
+
                     </div>
                 )
 
-            case 4:
+            // case 3:
+            //     return (
+            //         <div className="p-6 bg-white rounded-b-lg shadow-md">
+            //             <div className="grid grid-cols-1 gap-6">
+            //                 <div>
+            //                     <label className="block text-sm font-medium text-gray-700 mb-2">Type de Transaction</label>
+            //                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            //                         {transactionTypes.map(type => {
+            //                             let Icon
+            //                             switch (type.icon) {
+            //                                 case "Package":
+            //                                     Icon = Package
+            //                                     break
+            //                                 case "CreditCard":
+            //                                     Icon = CreditCard
+            //                                     break
+            //                                 case "DollarSign":
+            //                                     Icon = DollarSign
+            //                                     break
+            //                                 default:
+            //                                     Icon = Package
+            //                             }
+
+            //                             return (
+            //                                 <label key={type.id} className="flex items-center p-3 border border-gray-100 rounded-md hover:bg-blue-50 transition-colors cursor-pointer">
+            //                                     <input
+            //                                         type="radio"
+            //                                         checked={transactionType === type.type}
+            //                                         onChange={() => setTransactionType(type.type)}
+            //                                         className="w-4 h-4 text-blue-600"
+            //                                     />
+            //                                     <div className="ml-2">
+            //                                         <div className="flex items-center gap-1.5">
+            //                                             <Icon size={16} className={`text-${type.type === 'stock' ? 'blue' : type.type === 'credit' ? 'orange' : 'green'}-600`} />
+            //                                             <span className="text-sm font-medium">{type.name}</span>
+            //                                         </div>
+            //                                         <p className="text-xs text-gray-500 mt-1">{type.description}</p>
+            //                                     </div>
+            //                                 </label>
+            //                             )
+            //                         })}
+            //                     </div>
+            //                 </div>
+
+            //                 {/* {transactionType === "credit" && (
+            //                     <div className="p-4 border rounded-md bg-orange-50 border-orange-200">
+            //                         <h4 className="text-sm font-medium text-orange-800 mb-2 flex items-center gap-2">
+            //                             <AlertCircle size={16} />
+            //                             Option de paiement anticipé
+            //                         </h4>
+            //                         <div className="flex flex-col">
+            //                             <label className="text-sm text-gray-700 mb-1">Montant d'avance (%)</label>
+            //                             <input
+            //                                 type="range"
+            //                                 min="0"
+            //                                 max="50"
+            //                                 step="5"
+            //                                 value={advancePayment}
+            //                                 onChange={(e) => setAdvancePayment(parseInt(e.target.value))}
+            //                                 className="w-full accent-orange-500"
+            //                             />
+            //                             <div className="flex justify-between text-xs text-gray-500 mt-1">
+            //                                 <span>0%</span>
+            //                                 <span>Paiement d'avance: {advancePayment}%</span>
+            //                                 <span>50%</span>
+            //                             </div>
+            //                         </div>
+            //                     </div>
+            //                 )} */}
+            //             </div>
+            //         </div>
+            //     )
+
+            case 3:
                 return (
                     <div className="p-6 bg-white rounded-b-lg shadow-md">
 

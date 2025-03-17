@@ -2,12 +2,9 @@ import type React from "react"
 import {
     CheckCircle,
     CalendarDays,
-    Save,
     Printer,
     Download,
-    Share2,
     Building,
-    Briefcase,
 } from "lucide-react"
 import type { StepProps, RequisitionItem } from "../../../types/requisition"
 
@@ -39,10 +36,6 @@ export const StepThree: React.FC<StepProps> = ({ formData }) => {
                                     <Building size={14} />
                                     <span>DAC</span>
                                 </div>
-                                <div className="flex items-center gap-1">
-                                    <Briefcase size={14} />
-                                    <span>{formData.fourniseur}</span>
-                                </div>
                             </div>
                         </div>
                         <div>
@@ -58,7 +51,6 @@ export const StepThree: React.FC<StepProps> = ({ formData }) => {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Désignation</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unité</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qté D</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fourniseur</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -72,7 +64,6 @@ export const StepThree: React.FC<StepProps> = ({ formData }) => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.uniteMesure}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.quantiteDemande}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.fourniseur}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -91,7 +82,7 @@ export const StepThree: React.FC<StepProps> = ({ formData }) => {
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 ></textarea>
             </div>
-
+            {/* 
             <div className="flex flex-wrap gap-2 justify-center">
                 <button
                     type="button"
@@ -107,7 +98,7 @@ export const StepThree: React.FC<StepProps> = ({ formData }) => {
                     <Download size={18} />
                     Exporter en PDF
                 </button>
-            </div>
+            </div> */}
         </div>
     )
 }

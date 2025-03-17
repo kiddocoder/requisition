@@ -9,7 +9,6 @@ import { useState } from "react"
 export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
     const [currentItem, setCurrentItem] = useState({
         designation: "",
-        fourniseur: "",
         uniteMesure: "",
         quantiteDemande: "",
         quantiteRequisition: "",
@@ -44,7 +43,6 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
 
         // Réinitialiser le formulaire
         setCurrentItem({
-            fourniseur: "",
             designation: "",
             uniteMesure: "",
             quantiteDemande: "",
@@ -74,7 +72,6 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
 
         // Réinitialiser le formulaire
         setCurrentItem({
-            fourniseur: "",
             designation: "",
             uniteMesure: "",
             quantiteDemande: "",
@@ -97,7 +94,6 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
 
     const isItemValid = (): boolean => {
         return !!(
-            currentItem.fourniseur &&
             currentItem.designation &&
             currentItem.uniteMesure &&
             currentItem.quantiteDemande
@@ -111,36 +107,17 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                     <Package size={18} className="text-blue-600" />
                     Informations sur l'article
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Fourniseur *</label>
-                        <select
-                            value={currentItem.fourniseur}
-                            onChange={(e) => handleInputChange("fourniseur", e.target.value)}
-                            className={`w-full p-2 border mt-1 outline-none rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent 
-                ${itemErrors.fourniseur ? "border-red-500" : "border-gray-300"}`}
-                        >
-                            <option value="" selected disabled>Sélectionnez le nom du fourniseur</option>
-                            <option value="Test 1">Test 1</option>
-                            <option value="Test 2">Test 2</option>
-                            <option value="Test 3">Test 3</option>
-                            <option value="Test 4">Test 4</option>
-                        </select>
-                        {itemErrors.uniteMesure && <p className="text-red-500 text-xs mt-1">{itemErrors.uniteMesure}</p>}
-                    </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Désignation *</label>
-                        <input
-                            type="text"
-                            value={currentItem.designation}
-                            onChange={(e) => handleInputChange("designation", e.target.value)}
-                            className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent 
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Désignation *</label>
+                    <input
+                        type="text"
+                        value={currentItem.designation}
+                        onChange={(e) => handleInputChange("designation", e.target.value)}
+                        className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent 
                 ${itemErrors.designation ? "border-red-500" : "border-gray-300"}`}
-                        />
-                        {itemErrors.designation && <p className="text-red-500 text-xs mt-1">{itemErrors.designation}</p>}
-                    </div>
-
+                    />
+                    {itemErrors.designation && <p className="text-red-500 text-xs mt-1">{itemErrors.designation}</p>}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -210,7 +187,6 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Désignation</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unite</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qté D</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fourniseur</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                                 </tr>
                             </thead>
@@ -225,7 +201,6 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">{item.uniteMesure}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">{item.quantiteDemande}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{item.fourniseur}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                                             <button
                                                 type="button"
