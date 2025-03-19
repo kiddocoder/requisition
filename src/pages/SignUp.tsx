@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react";
 import StepOneSignup from "../components/forms/signup/StepOneSignup";
 import StepTwoSignup from "../components/forms/signup/StepTwoSignup";
+import { signUpUser } from "../api/users";
 
 export default function SignUp() {
     const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function SignUp() {
         email: "",
         password: "",
         confirmPassword: "",
-        enterprise: "",
+        enterprise_id: "",
         post: "",
     });
 
@@ -31,15 +32,14 @@ export default function SignUp() {
         setError("");
 
         try {
-            // Simuler un appel API
-            await new Promise((resolve) => setTimeout(resolve, 1500));
+            await signUpUser(formData);
 
             // Vérification simple (à remplacer par un vrai appel API)
-            if (formData.email && formData.password && formData.confirmPassword && formData.enterprise) {
+            if (formData.email && formData.password && formData.confirmPassword && formData.enterprise_id) {
                 if (formData.password !== formData.confirmPassword) {
                     throw new Error("Les mots de passe ne correspondent pas");
                 }
-                console.log("Inscription réussie!", { email: formData.email, enterprise: formData.enterprise });
+                console.log("Inscription réussie!", { email: formData.email, enterprise_id: formData.enterprise_id });
                 setSuccess(true);
 
                 // Rediriger après inscription réussie
@@ -59,7 +59,7 @@ export default function SignUp() {
 
     const handleNextStep = () => {
         if (step === 1) {
-            if (!formData.username || !formData.enterprise || !formData.post) {
+            if (!formData.username || !formData.enterprise_id || !formData.post) {
                 setError("Veuillez remplir tous les champs");
                 return;
             }

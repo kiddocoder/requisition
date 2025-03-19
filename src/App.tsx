@@ -13,6 +13,7 @@ import Directeur from "./pages/Directeur"
 import SignUp from "./pages/SignUp"
 import Overview from "./pages/Overview"
 import Accounter from "./components/forms/Accounter/Accounter"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
 function App(): React.ReactElement {
   const router = createBrowserRouter([
@@ -62,7 +63,9 @@ function App(): React.ReactElement {
   ]
   )
   return (
-    <RouterProvider router={router} />
+    <QueryClientProvider client={new QueryClient()}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   )
 }
 

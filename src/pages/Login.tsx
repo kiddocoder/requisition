@@ -2,6 +2,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Eye, EyeOff, Lock, Mail, AlertCircle, CheckCircle2 } from "lucide-react"
+import { loginUser } from "../api/users"
 
 export default function Login() {
     const navigate = useNavigate()
@@ -13,19 +14,18 @@ export default function Login() {
     const [error, setError] = useState("")
     const [success, setSuccess] = useState(false)
 
-    const handleLogin = async (e) => {
+    const handleLogin = async (e: any) => {
         e.preventDefault()
         setLoading(true)
         setError("")
-
         try {
-            // Simuler un appel API
-            await new Promise((resolve) => setTimeout(resolve, 1500))
 
-            // Vérification simple (à remplacer par un vrai appel API)
             if (email && password) {
+                // Simuler un appel API
+                await loginUser({ email: email, password: password })
+
                 console.log("Connexion réussie!", { email, rememberMe })
-                setSuccess(true || false)
+                setSuccess(true)
 
                 // Rediriger après connexion réussie
                 setTimeout(() => {
@@ -34,9 +34,9 @@ export default function Login() {
             } else {
                 throw new Error("Veuillez remplir tous les champs")
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error("Erreur de connexion:", err)
-            setError(err.message || "Une erreur est survenue lors de la connexion")
+            setError(err?.response?.data?.message || "Une erreur est survenue lors de la connexion")
         } finally {
             setLoading(false)
         }
