@@ -15,6 +15,7 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
     })
     const [editingIndex, setEditingIndex] = useState<number | null>(null)
     const [itemErrors, setItemErrors] = useState<FormErrors>({})
+    const [isNewArticle, setIsNewArticle] = useState(true)
 
     const handleInputChange = (field: keyof RequisitionItem, value: string) => {
         const updatedItem = { ...currentItem, [field]: value }
@@ -108,8 +109,16 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                     Informations sur l'article
                 </h3>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Désignation *</label>
+                <div className="flex items-center gap-4">
+                    <label className="text-sm font-medium text-gray-700">Nouvel Article</label>
+                    <input
+                        type="checkbox"
+                        checked={isNewArticle}
+                        onChange={() => setIsNewArticle(!isNewArticle)}
+                    />
+                </div>
+                {isNewArticle ? <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Article/ésignation *</label>
                     <input
                         type="text"
                         value={currentItem.designation}
@@ -119,6 +128,23 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                     />
                     {itemErrors.designation && <p className="text-red-500 text-xs mt-1">{itemErrors.designation}</p>}
                 </div>
+                    :
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Article/ésignation *</label>
+                        <select
+                            value={currentItem.designation}
+                            onChange={(e) => handleInputChange("designation", e.target.value)}
+                            className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                ${itemErrors.designation ? "border-red-500" : "border-gray-300"}`}
+                        >
+                            <option value="">Sélectionner un article</option>
+                            <option value="1">Article 1</option>
+                            <option value="2">Article 2</option>
+                            <option value="3">Article 3</option>
+                        </select>
+                        {itemErrors.designation && <p className="text-red-500 text-xs mt-1">{itemErrors.designation}</p>}
+                    </div>
+                }
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>

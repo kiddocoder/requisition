@@ -1,5 +1,4 @@
 
-import { useState } from "react"
 import { FileText, TrendingUp, Users, DollarSign, Package } from "lucide-react"
 import {
     AreaChart,
@@ -60,29 +59,10 @@ const statusData = [
 
 
 export default function Dashboard() {
-    const [activeTab, setActiveTab] = useState("overview")
 
     return (
         <main className="flex-1 p-6 md:ml-20 lg:ml-64">
             <div className="max-w-7xl mx-auto">
-                {/* Tabs */}
-                <div className="mb-6 border-b border-gray-200">
-                    <nav className="flex space-x-8 overflow-x-scroll md:overflow-visible">
-                        {["overview", "requisitions", "expenses", "reports"].map((tab) => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`py-4 px-1 font-medium text-sm border-b-2 ${activeTab === tab
-                                    ? "border-blue-600 text-blue-600"
-                                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                    }`}
-                            >
-                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                            </button>
-                        ))}
-                    </nav>
-                </div>
-
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
