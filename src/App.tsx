@@ -14,6 +14,7 @@ import SignUp from "./pages/SignUp"
 import Overview from "./pages/Overview"
 import Accounter from "./components/forms/Accounter/Accounter"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import Dashboard from "./pages/Dashboard"
 
 function App(): React.ReactElement {
   const router = createBrowserRouter([
@@ -37,6 +38,10 @@ function App(): React.ReactElement {
       path: "/",
       element: <AppLayout />,
       children: [
+        {
+          path: "/dashboard",
+          element: <Dashboard />
+        },
         {
           path: "/direction",
           element: <Directeur />

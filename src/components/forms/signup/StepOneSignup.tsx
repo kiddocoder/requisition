@@ -1,12 +1,5 @@
 
-
-const posts = [
-    { id: "comptabilite", name: "Service comptabilite" },
-    { id: "demandeur", name: "Demandeur de requisition" },
-    { id: "approvisionnement", name: "Service d'approvisionnement" },
-    { id: "technique", name: "Service technique" },
-    { id: "direction", name: "Direction d'approbation" },
-];
+import posts from "../../../stores/posts"
 import { useFetchEnterprises } from "../../../hooks/apiFeatures/useEnterprises";
 const StepOneSignup = ({ formData, handleChange }: any) => {
     const { data: enterprises = [] } = useFetchEnterprises()
