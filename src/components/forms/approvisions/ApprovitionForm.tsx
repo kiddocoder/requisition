@@ -75,7 +75,7 @@ const priorities = [
     }
 ]
 
-function ApprovitionForm({ onClose }) {
+function ApprovitionForm({ onClose, requisition }) {
     // Étapes du formulaire
     const steps = [
         { id: 1, label: "Sélection des articles" },
@@ -88,11 +88,11 @@ function ApprovitionForm({ onClose }) {
         { id: "3", name: "Supplier 3" },
         { id: "4", name: "Supplier 4" },
     ]
+
     // États du formulaire
     const [currentStep, setCurrentStep] = useState(1)
-    const [selectedRequisition, setSelectedRequisition] = useState(availableRequisitions[0].id)
+    const [selectedRequisition, setSelectedRequisition] = useState(requisition)
     const [selectedItems, setSelectedItems] = useState<RequisitionItem[]>([])
-    const [currentEditItem, setCurrentEditItem] = useState<string | null>(null)
     const [transactionType, setTransactionType] = useState("stock")
     const [advancePayment, setAdvancePayment] = useState(0)
     const [priority, setPriority] = useState("normal")
@@ -283,13 +283,12 @@ function ApprovitionForm({ onClose }) {
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-blue-100">
-                                            {availableRequisitions
-                                                .find(req => req.id === selectedRequisition)
+                                            {selectedRequisition
                                                 ?.items.map(item => (
                                                     <tr key={item.id} className="hover:bg-blue-50">
-                                                        <td className="px-4 py-3 text-sm text-gray-700">{item.name}</td>
-                                                        <td className="px-4 py-3 text-sm text-gray-600">{item.description}</td>
-                                                        <td className="px-4 py-3 text-sm text-gray-700">{item.quantity}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-700">{item.article.name}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-600">{item.article.description}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-700">{parseInt(item.quantiteDemande)}</td>
                                                         <td className="px-4 py-3 text-sm">
                                                             <button
                                                                 onClick={() => handleAddItem(item)}
@@ -324,8 +323,8 @@ function ApprovitionForm({ onClose }) {
                                         <tbody className="bg-white divide-y divide-blue-100">
                                             {selectedItems.map(item => (
                                                 <tr key={item.id} className="hover:bg-blue-50">
-                                                    <td className="px-4 py-3 text-sm text-gray-700">{item.name}</td>
-                                                    <td className="px-4 py-3 text-sm text-gray-700">{item.quantity}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-700">{item.article.name}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-700">{item.quantiteDemande}</td>
                                                     <td className="px-4 py-3 text-sm text-gray-700">0</td>
                                                     <td className="px-4 py-3 text-sm text-gray-700">
                                                         <select
@@ -395,9 +394,9 @@ function ApprovitionForm({ onClose }) {
                                 <tbody className="bg-white divide-y divide-blue-100">
                                     {selectedItems.map(item => (
                                         <tr key={item.id} className="hover:bg-blue-50">
-                                            <td className="px-4 py-3 text-sm text-gray-700">{item.name}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-600">{item.description}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-700">{item.quantity}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-700">{item.article.name}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-600">{item.article.description}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-700">{item.quantiteDemande}</td>
                                             <td className="px-4 py-3 text-sm">
                                                 <input
                                                     type="number"

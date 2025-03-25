@@ -8,6 +8,7 @@ import {
     Clock,
     Eye,
 } from 'lucide-react';
+import { useFetchRequisitions } from "../hooks/apiFeatures/useRequisitions";
 
 interface Requisition {
     id: number;
@@ -19,17 +20,13 @@ interface Requisition {
 
 function Approvisionnement() {
     const [isModalOpen, setIsModalOpen] = useState<Boolean>(false)
-    const [requisitions, setRequisitions] = useState<Array<Requisition>>([])
+    const { data: requisitions = [], isLoading: isReqLoading } = useFetchRequisitions()
+    const [selectedRequisition, setSelectedRequisition] = useState(null);
 
-
-    useEffect(() => {
-        setRequisitions([
-            { id: 1, date: "2025-03-01", title: "Fournitures de bureau", total: 1250.75, status: "approved" },
-            { id: 2, date: "2025-02-25", title: "Matériel informatique", total: 3780.00, status: "pending" },
-            { id: 3, date: "2025-02-18", title: "Mobilier", total: 5670.50, status: "rejected" },
-        ])
-    }, [])
-
+    const handleOpenModal = (req: any) => {
+        setSelectedRequisition(req)
+        setIsModalOpen(true)
+    }
 
     return (
         <>
@@ -118,7 +115,7 @@ function Approvisionnement() {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{req.id}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{req.date}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{req.title}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{req.total.toFixed(2)} $</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{parseInt(req.total).toFixed(2)} $</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
                               ${req.status === 'approved' ? 'bg-green-100 text-green-800' :
@@ -130,7 +127,7 @@ function Approvisionnement() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <button
-                                                onClick={() => setIsModalOpen(true)}
+                                                onClick={() => handleOpenModal(req)}
                                                 className="cursor-pointer text-blue-600 hover:text-blue-800 mr-3">
                                                 <Eye size={16} />
                                             </button>
@@ -160,7 +157,7 @@ function Approvisionnement() {
                     className={`fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-300 p-4`}
                 >
 
-                    <ApprovitionForm onClose={() => setIsModalOpen(false)} />
+                    <ApprovitionForm onClose={() => setIsModalOpen(false)} requisition={selectedRequisition} />
                 </div>
             )
             }
