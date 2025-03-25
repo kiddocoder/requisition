@@ -1,14 +1,28 @@
 import type React from "react"
-import {
-    CheckCircle,
-    CalendarDays,
-    Printer,
-    Download,
-    Building,
-} from "lucide-react"
-import type { StepProps, RequisitionItem } from "../../../types/requisition"
+import { CheckCircle, CalendarDays, Building } from 'lucide-react'
+import type { StepProps } from "../../../types/requisition"
 
-export const StepThree: React.FC<StepProps> = ({ formData }) => {
+export const StepThree: React.FC<StepProps> = ({ formData, setFormData }) => {
+    const handleCommentChange = (value: string) => {
+        setFormData({ ...formData, comment: value })
+    }
+
+    // Combine both arrays for display purposes
+    const getAllItems = () => {
+        const newItemsWithMeta = (formData.newItems || []).map(item => ({
+            designation: item.name,
+            uniteMesure: item._uiData?.uniteMesure || "",
+            quantiteDemande: item._uiData?.quantiteDemande || ""
+        }))
+
+        const existingItemsWithMeta = (formData.items || []).map(item => ({
+            designation: item._uiData?.designation || "Article existant",
+            uniteMesure: item._uiData?.uniteMesure || "",
+            quantiteDemande: item._uiData?.quantiteDemande || ""
+        }))
+
+        return [...newItemsWithMeta, ...existingItemsWithMeta]
+    }
 
     return (
         <div className="space-y-6">
@@ -30,15 +44,13 @@ export const StepThree: React.FC<StepProps> = ({ formData }) => {
                             <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
                                 <div className="flex items-center gap-1">
                                     <CalendarDays size={14} />
-                                    <span>{formData.date}</span>
+                                    <span>{new Date(formData.date).toLocaleString()}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Building size={14} />
                                     <span>DAC</span>
                                 </div>
                             </div>
-                        </div>
-                        <div>
                         </div>
                     </div>
                 </div>
@@ -54,7 +66,7 @@ export const StepThree: React.FC<StepProps> = ({ formData }) => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {formData?.items?.map((item: RequisitionItem, index: number) => (
+                            {getAllItems().map((item, index) => (
                                 <tr key={index} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">{index + 1}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -67,7 +79,6 @@ export const StepThree: React.FC<StepProps> = ({ formData }) => {
                                 </tr>
                             ))}
                         </tbody>
-
                     </table>
                 </div>
             </div>
@@ -75,31 +86,13 @@ export const StepThree: React.FC<StepProps> = ({ formData }) => {
             <div className="mt-8 mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Commentaires</label>
                 <textarea
-                    value={formData.comments}
-                    onChange={(e) => handleInputChange("comments", e.target.value)}
+                    value={formData.comment || ""}
+                    onChange={(e) => handleCommentChange(e.target.value)}
                     rows={4}
                     placeholder="Informations supplémentaires ou instructions spéciales..."
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 ></textarea>
             </div>
-            {/* 
-            <div className="flex flex-wrap gap-2 justify-center">
-                <button
-                    type="button"
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors flex items-center gap-2"
-                >
-                    <Printer size={18} />
-                    Imprimer
-                </button>
-                <button
-                    type="button"
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors flex items-center gap-2"
-                >
-                    <Download size={18} />
-                    Exporter en PDF
-                </button>
-            </div> */}
         </div>
     )
 }
-

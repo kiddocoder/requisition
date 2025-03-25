@@ -6,18 +6,20 @@ import { ModalHeader } from "./modal-header";
 import { StepOne } from "./step-one";
 import { StepThree } from "./step-three";
 import { StepTwo } from "./step-two";
-import { useNavigate } from "react-router-dom";
+
+import { useAddRequisition } from "../../../hooks/apiFeatures/useRequisitions";
 
 export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) => {
     const [step, setStep] = useState(1)
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [formErrors, setFormErrors] = useState<FormErrors>({})
-    const navigate = useNavigate();
+
+    const addRequisitionMutation = useAddRequisition()
 
     const [formData, setFormData] = useState({
         titre: "",
         objet: "",
-        date: new Date(Date.now()),
+        date: new Date().toDateString(),
         items: [],
     })
 
@@ -56,15 +58,16 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) =
         setFormErrors({})
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!validateStep(step)) return
 
         console.log("Réquisition soumise:", formData)
 
+        await addRequisitionMutation.mutateAsync(formData)
+
         // Afficher une notification de succès
         alert("Réquisition soumise avec succès!")
-        onClose()
-        navigate("/approvisionnement")
+        // onClose()
     }
 
     const toggleFullScreen = () => {

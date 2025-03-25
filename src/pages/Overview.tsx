@@ -8,28 +8,15 @@ import {
     FileText,
     Printer,
     Clock,
+    Search,
 } from 'lucide-react';
+import { useFetchRequisitions } from "../hooks/apiFeatures/useRequisitions";
 
-interface Requisition {
-    id: number;
-    date: string;
-    title: string;
-    total: number;
-    status: string;
-}
+
 
 function Overview() {
     const [isModalOpen, setIsModalOpen] = useState<Boolean>(false)
-    const [requisitions, setRequisitions] = useState<Array<Requisition>>([])
-
-
-    useEffect(() => {
-        setRequisitions([
-            { id: 1, date: "2025-03-01", title: "Fournitures de bureau", total: 1250.75, status: "approved" },
-            { id: 2, date: "2025-02-25", title: "Matériel informatique", total: 3780.00, status: "pending" },
-            { id: 3, date: "2025-02-18", title: "Mobilier", total: 5670.50, status: "rejected" },
-        ])
-    }, [])
+    const { data: requisitions = [], isLoading: isReqLoading } = useFetchRequisitions()
 
 
     return (
@@ -41,26 +28,14 @@ function Overview() {
                         <h2 className="text-2xl font-bold text-gray-800">Gestion des Réquisitions</h2>
                         <p className="text-gray-600 mt-1">Créez, suivez et gérez vos demandes de réquisition</p>
                     </div>
+                    <div>
 
-                    <div className="flex gap-2">
-                        {/* <div className="flex items-center md:hidden mb-4 w-full">
-                            <input
-                                type="text"
-                                placeholder="Rechercher..."
-                                className="pl-9 pr-4 py-2 rounded-lg border border-gray-200 flex-grow"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                            <Search className="absolute ml-3 text-gray-400" size={18} />
-                        </div> */}
                         <button
+                            className="bg-blue-600 p-4 cursor-pointer text-white rounded-lg"
                             onClick={() => setIsModalOpen(true)}
-                            className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg flex items-center gap-2"
-                        >
-                            <Plus size={18} />
-                            <span>Nouvelle Réquisition</span>
-                        </button>
+                        >Nouvelle Requisition</button>
                     </div>
+
                 </div>
 
                 {/* Dashboard cards */}
@@ -104,8 +79,19 @@ function Overview() {
 
                 {/* Recent Requisitions */}
                 <div className="bg-white rounded-lg shadow mb-8">
-                    <div className="p-5 border-b">
+                    <div className="flex justify-between p-5 border-b">
                         <h3 className="font-semibold text-gray-800">Réquisitions Récentes</h3>
+
+                        <div className="flex items-center mb-4">
+                            <input
+                                type="text"
+                                placeholder="Rechercher..."
+                                className="pl-9 pr-4 py-2 rounded-lg border border-gray-200 flex-grow"
+
+                            />
+                            <Search className="absolute ml-3 text-gray-400" size={18} />
+                        </div>
+
                     </div>
 
                     <div className="overflow-x-auto">
@@ -121,12 +107,12 @@ function Overview() {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {requisitions.map((req) => (
+                                {requisitions?.map((req) => (
                                     <tr key={req.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{req.id}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{req.date}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{req.title}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{req.total.toFixed(2)} $</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{req.date.toLocaleString()}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{req.titre || "-"}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{parseInt(req.total).toFixed(2)} $</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
                               ${req.status === 'approved' ? 'bg-green-100 text-green-800' :
@@ -152,7 +138,9 @@ function Overview() {
                             </tbody>
                         </table>
                     </div>
-
+                    {
+                        isReqLoading && <p className="p-8 text-center text-gray-500">Chargement de requisitions...</p>
+                    }
                     {requisitions.length === 0 && (
                         <div className="p-8 text-center text-gray-500">
                             Aucune réquisition trouvée. Créez une nouvelle réquisition pour commencer.

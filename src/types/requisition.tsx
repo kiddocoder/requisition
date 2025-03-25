@@ -2,26 +2,29 @@ export type TransactionType = "stock" | "credit" | "cash"
 export type PriorityType = "low" | "normal" | "high"
 
 export interface RequisitionItem {
-    id?: string
-    fourniseur: string,
-    designation: string
-    uniteMesure: string
-    quantiteDemande: string
-    quantiteRequisition: string
-    prixUnitaire: string
-    prixTotal: string
-    type: TransactionType
-    advancePayment: string,
-    titre: string,
-    objet: string,
-    date: string | null,
+    id: number;
+    designation?: string;
+    uniteMesure?: string;
+    quantiteDemande?: string;
+    quantiteRequisition?: string;
+    article_id?: number | null;
+    name?: string;
+    _uiData?: {
+        designation?: string;
+        uniteMesure?: string;
+        quantiteDemande?: string;
+    };
 }
 
 export interface RequisitionFormData {
     titre: string,
     objet: string,
-    date: string | null,
-    items: any[]
+    date: Date | null,
+    items: any[],
+    demendeur_id: null,
+    enterprise_id: null,
+    newItems: [],
+    comment: null
 }
 
 export interface FormErrors {

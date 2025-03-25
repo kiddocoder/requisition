@@ -5,7 +5,7 @@ export const getArticles = async () => {
   return data;
 };
 
-export const addArticle = async () => {
-  const { data } = await API.post("articles");
+export const addArticle = async (datla:any) => {
+  const { data } = await API.post("articles",datla);
   return data;
 };

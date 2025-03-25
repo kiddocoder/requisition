@@ -1,23 +1,26 @@
 "use client"
 
 import type React from "react"
-
-import { Package, Plus, Check, FileText, Edit2, Trash2 } from "lucide-react"
-import type { FormErrors, RequisitionItem, StepProps } from "../../../types/requisition"
+import { Package, Plus, Check, FileText, Edit2, Trash2 } from 'lucide-react'
+import type { FormErrors, StepProps } from "../../../types/requisition"
 import { useState } from "react"
+import { useFetchArticles } from "../../../hooks/apiFeatures/useArticles"
 
 export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
     const [currentItem, setCurrentItem] = useState({
-        designation: "",
+        name: "", // For new items
+        article_id: null, // For existing items
+        // These fields are for UI display only
         uniteMesure: "",
         quantiteDemande: "",
-        quantiteRequisition: "",
     })
     const [editingIndex, setEditingIndex] = useState<number | null>(null)
     const [itemErrors, setItemErrors] = useState<FormErrors>({})
     const [isNewArticle, setIsNewArticle] = useState(true)
 
-    const handleInputChange = (field: keyof RequisitionItem, value: string) => {
+    const { data: articles = [] } = useFetchArticles();
+
+    const handleInputChange = (field: string, value: string) => {
         const updatedItem = { ...currentItem, [field]: value }
         // Effacer l'erreur si le champ est rempli
         if (value && itemErrors[field]) {
@@ -30,24 +33,61 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
     const addItem = () => {
         // Validation des champs requis
         const newErrors: FormErrors = {}
-        if (!currentItem.designation) newErrors.designation = "Requis"
+
+        if (isNewArticle) {
+            if (!currentItem.name) newErrors.name = "Requis"
+        } else {
+            if (!currentItem.article_id) newErrors.article_id = "Requis"
+        }
+
         if (!currentItem.uniteMesure) newErrors.uniteMesure = "Requis"
         if (!currentItem.quantiteDemande) newErrors.quantiteDemande = "Requis"
+
         if (Object.keys(newErrors).length > 0) {
             setItemErrors(newErrors)
             return
         }
 
-        // Ajouter l'article à la liste
-        const updatedItems = [...formData.items, currentItem] // Ajoute le nouvel article
-        setFormData({ ...formData, items: updatedItems }) // Met à jour formData
+        // Prepare the item based on whether it's new or existing
+        let newItemsArray = [...(formData.newItems || [])]
+        let itemsArray = [...(formData.items || [])]
+
+        if (isNewArticle) {
+            // Add to newItems array
+            newItemsArray.push({
+                name: currentItem.name,
+                // Store UI-only data in a separate field
+                _uiData: {
+                    uniteMesure: currentItem.uniteMesure,
+                    quantiteDemande: currentItem.quantiteDemande
+                }
+            })
+        } else {
+            // Add to items array
+            itemsArray.push({
+                article_id: currentItem.article_id,
+                // Store UI-only data in a separate field
+                _uiData: {
+                    uniteMesure: currentItem.uniteMesure,
+                    quantiteDemande: currentItem.quantiteDemande,
+                    designation: articles.find(a => a.id === currentItem.article_id)?.name || ""
+                }
+            })
+        }
+
+        // Update formData with both arrays
+        setFormData({
+            ...formData,
+            newItems: newItemsArray,
+            items: itemsArray
+        })
 
         // Réinitialiser le formulaire
         setCurrentItem({
-            designation: "",
+            name: "",
+            article_id: null,
             uniteMesure: "",
-            quantiteDemande: "",
-            quantiteRequisition: ""
+            quantiteDemande: ""
         })
         setEditingIndex(null)
         setItemErrors({})
@@ -58,47 +98,127 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
 
         // Validation des champs requis
         const newErrors: FormErrors = {}
-        if (!currentItem.designation) newErrors.designation = "Requis"
+
+        if (isNewArticle) {
+            if (!currentItem.name) newErrors.name = "Requis"
+        } else {
+            if (!currentItem.article_id) newErrors.article_id = "Requis"
+        }
+
         if (!currentItem.uniteMesure) newErrors.uniteMesure = "Requis"
         if (!currentItem.quantiteDemande) newErrors.quantiteDemande = "Requis"
+
         if (Object.keys(newErrors).length > 0) {
             setItemErrors(newErrors)
             return
         }
 
-        // Mettre à jour l'article dans la liste
-        const updatedItems = [...formData.items]
-        updatedItems[editingIndex] = currentItem // Remplace l'article existant
-        setFormData({ ...formData, items: updatedItems }) // Met à jour formData
+        // Update the appropriate array based on whether it's a new or existing item
+        if (isNewArticle) {
+            const newItemsArray = [...(formData.newItems || [])]
+            if (editingIndex < newItemsArray.length) {
+                newItemsArray[editingIndex] = {
+                    name: currentItem.name,
+                    _uiData: {
+                        uniteMesure: currentItem.uniteMesure,
+                        quantiteDemande: currentItem.quantiteDemande
+                    }
+                }
+                setFormData({ ...formData, newItems: newItemsArray })
+            }
+        } else {
+            const itemsArray = [...(formData.items || [])]
+            if (editingIndex < itemsArray.length) {
+                itemsArray[editingIndex] = {
+                    article_id: currentItem.article_id,
+                    _uiData: {
+                        uniteMesure: currentItem.uniteMesure,
+                        quantiteDemande: currentItem.quantiteDemande,
+                        designation: articles.find(a => a.id === currentItem.article_id)?.name || ""
+                    }
+                }
+                setFormData({ ...formData, items: itemsArray })
+            }
+        }
 
         // Réinitialiser le formulaire
         setCurrentItem({
-            designation: "",
+            name: "",
+            article_id: null,
             uniteMesure: "",
-            quantiteDemande: "",
-            quantiteRequisition: ""
+            quantiteDemande: ""
         })
         setEditingIndex(null)
         setItemErrors({})
     }
 
-    const editItem = (index: number) => {
-        setCurrentItem(formData.items[index])
+    const editItem = (index: number, isNew: boolean) => {
+        if (isNew) {
+            const item = formData.newItems?.[index]
+            if (item) {
+                setCurrentItem({
+                    name: item.name,
+                    article_id: null,
+                    uniteMesure: item._uiData?.uniteMesure || "",
+                    quantiteDemande: item._uiData?.quantiteDemande || ""
+                })
+                setIsNewArticle(true)
+            }
+        } else {
+            const item = formData.items?.[index]
+            if (item) {
+                setCurrentItem({
+                    name: "",
+                    article_id: item.article_id,
+                    uniteMesure: item._uiData?.uniteMesure || "",
+                    quantiteDemande: item._uiData?.quantiteDemande || ""
+                })
+                setIsNewArticle(false)
+            }
+        }
         setEditingIndex(index)
         setItemErrors({})
     }
 
-    const deleteItem = (index: number) => {
-        const updatedItems = formData.items.filter((_, i) => i !== index)
-        setFormData({ items: updatedItems })
+    const deleteItem = (index: number, isNew: boolean) => {
+        if (isNew) {
+            const newItemsArray = [...(formData.newItems || [])].filter((_, i) => i !== index)
+            setFormData({ ...formData, newItems: newItemsArray })
+        } else {
+            const itemsArray = [...(formData.items || [])].filter((_, i) => i !== index)
+            setFormData({ ...formData, items: itemsArray })
+        }
     }
 
     const isItemValid = (): boolean => {
-        return !!(
-            currentItem.designation &&
-            currentItem.uniteMesure &&
-            currentItem.quantiteDemande
-        )
+        if (isNewArticle) {
+            return !!(currentItem.name && currentItem.uniteMesure && currentItem.quantiteDemande)
+        } else {
+            return !!(currentItem.article_id && currentItem.uniteMesure && currentItem.quantiteDemande)
+        }
+    }
+
+    // Combine both arrays for display purposes
+    const getAllItems = () => {
+        const newItemsWithMeta = (formData.newItems || []).map((item, index) => ({
+            ...item,
+            _isNew: true,
+            _index: index,
+            designation: item.name,
+            uniteMesure: item._uiData?.uniteMesure || "",
+            quantiteDemande: item._uiData?.quantiteDemande || ""
+        }))
+
+        const existingItemsWithMeta = (formData.items || []).map((item, index) => ({
+            ...item,
+            _isNew: false,
+            _index: index,
+            designation: item._uiData?.designation || articles.find(a => a.id === item.article_id)?.name || "Article inconnu",
+            uniteMesure: item._uiData?.uniteMesure || "",
+            quantiteDemande: item._uiData?.quantiteDemande || ""
+        }))
+
+        return [...newItemsWithMeta, ...existingItemsWithMeta]
     }
 
     return (
@@ -117,44 +237,48 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                         onChange={() => setIsNewArticle(!isNewArticle)}
                     />
                 </div>
-                {isNewArticle ? <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Article/ésignation *</label>
-                    <input
-                        type="text"
-                        value={currentItem.designation}
-                        onChange={(e) => handleInputChange("designation", e.target.value)}
-                        className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent 
-                ${itemErrors.designation ? "border-red-500" : "border-gray-300"}`}
-                    />
-                    {itemErrors.designation && <p className="text-red-500 text-xs mt-1">{itemErrors.designation}</p>}
-                </div>
-                    :
+
+                {isNewArticle ? (
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Article/ésignation *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Nom de l'article *</label>
+                        <input
+                            type="text"
+                            value={currentItem.name || ""}
+                            onChange={(e) => handleInputChange("name", e.target.value)}
+                            className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent 
+                                ${itemErrors.name ? "border-red-500" : "border-gray-300"}`}
+                        />
+                        {itemErrors.name && <p className="text-red-500 text-xs mt-1">{itemErrors.name}</p>}
+                    </div>
+                ) : (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Article existant *</label>
                         <select
-                            value={currentItem.designation}
-                            onChange={(e) => handleInputChange("designation", e.target.value)}
+                            value={currentItem.article_id || ""}
+                            onChange={(e) => handleInputChange("article_id", e.target.value)}
                             className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                ${itemErrors.designation ? "border-red-500" : "border-gray-300"}`}
+                                ${itemErrors.article_id ? "border-red-500" : "border-gray-300"}`}
                         >
                             <option value="">Sélectionner un article</option>
-                            <option value="1">Article 1</option>
-                            <option value="2">Article 2</option>
-                            <option value="3">Article 3</option>
+                            {articles.map((article: any) => (
+                                <option key={article.id} value={article.id}>
+                                    {article.name}
+                                </option>
+                            ))}
                         </select>
-                        {itemErrors.designation && <p className="text-red-500 text-xs mt-1">{itemErrors.designation}</p>}
+                        {itemErrors.article_id && <p className="text-red-500 text-xs mt-1">{itemErrors.article_id}</p>}
                     </div>
-                }
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Unité de Mesure *</label>
                         <input
                             type="text"
-                            value={currentItem.uniteMesure}
+                            value={currentItem.uniteMesure || ""}
                             onChange={(e) => handleInputChange("uniteMesure", e.target.value)}
                             className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent 
-                ${itemErrors.uniteMesure ? "border-red-500" : "border-gray-300"}`}
+                                ${itemErrors.uniteMesure ? "border-red-500" : "border-gray-300"}`}
                         />
                         {itemErrors.uniteMesure && <p className="text-red-500 text-xs mt-1">{itemErrors.uniteMesure}</p>}
                     </div>
@@ -163,10 +287,10 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                         <label className="block text-sm font-medium text-gray-700 mb-1">Quantité Demandée *</label>
                         <input
                             type="number"
-                            value={currentItem.quantiteDemande}
+                            value={currentItem.quantiteDemande || ""}
                             onChange={(e) => handleInputChange("quantiteDemande", e.target.value)}
                             className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent 
-                ${itemErrors.quantiteDemande ? "border-red-500" : "border-gray-300"}`}
+                                ${itemErrors.quantiteDemande ? "border-red-500" : "border-gray-300"}`}
                         />
                         {itemErrors.quantiteDemande && <p className="text-red-500 text-xs mt-1">{itemErrors.quantiteDemande}</p>}
                     </div>
@@ -175,10 +299,10 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                 <div className="flex justify-end">
                     <button
                         type="button"
-                        onClick={editingIndex !== null ? updateItem : addItem} // Appelle updateItem ou addItem
+                        onClick={editingIndex !== null ? updateItem : addItem}
                         disabled={!isItemValid()}
                         className={`px-4 py-2 rounded-md flex items-center gap-2
-        ${isItemValid()
+                            ${isItemValid()
                                 ? "bg-blue-600 text-white hover:bg-blue-700"
                                 : "bg-gray-200 text-gray-500 cursor-not-allowed"
                             }`}
@@ -199,11 +323,11 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
             </div>
 
             {/* Items Table */}
-            {formData?.items?.length > 0 && (
+            {(formData.newItems?.length > 0 || formData.items?.length > 0) && (
                 <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
                     <h3 className="font-medium text-gray-800 p-4 border-b border-gray-100 flex items-center gap-2">
                         <FileText size={18} className="text-blue-600" />
-                        Articles ajoutés ({formData?.items.length || 0})
+                        Articles ajoutés ({getAllItems().length})
                     </h3>
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
@@ -211,13 +335,14 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Désignation</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unite</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qté D</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {formData.items.map((item, index) => (
+                                {getAllItems().map((item, index) => (
                                     <tr key={index} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">{index + 1}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -225,19 +350,22 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                                                 {item.designation}
                                             </div>
                                         </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            {item._isNew ? "Nouveau" : "Existant"}
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">{item.uniteMesure}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">{item.quantiteDemande}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                                             <button
                                                 type="button"
-                                                onClick={() => editItem(index)}
+                                                onClick={() => editItem(item._index, item._isNew)}
                                                 className="text-blue-600 hover:text-blue-800 mr-3"
                                             >
                                                 <Edit2 size={16} />
                                             </button>
                                             <button
                                                 type="button"
-                                                onClick={() => deleteItem(index)}
+                                                onClick={() => deleteItem(item._index, item._isNew)}
                                                 className="text-red-600 hover:text-red-800"
                                             >
                                                 <Trash2 size={16} />
