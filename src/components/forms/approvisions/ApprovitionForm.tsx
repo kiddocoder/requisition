@@ -230,7 +230,7 @@ function ApprovitionForm({ onClose, requisition }) {
                 setPriority("normal")
                 setComment("")
                 setAttachments([])
-            }, 1000)
+            }, 100)
             navigate("/comptabilite");
         } catch (error) {
             console.error("Erreur lors de la soumission:", error)
@@ -260,7 +260,7 @@ function ApprovitionForm({ onClose, requisition }) {
         setPriority("normal")
         setComment("")
         setAttachments([])
-        setTimeout(() => onClose(), 1000)
+        setTimeout(() => onClose(), 10)
     }
 
     // Rendu des étapes du formulaire
