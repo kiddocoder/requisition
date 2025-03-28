@@ -1,30 +1,22 @@
 export type TransactionType = "stock" | "credit" | "cash"
 export type PriorityType = "low" | "normal" | "high"
-
 export interface RequisitionItem {
-    id: number;
-    designation?: string;
-    uniteMesure?: string;
-    quantiteDemande?: string;
-    quantiteRequisition?: string;
-    article_id?: number | null;
-    name?: string;
-    _uiData?: {
-        designation?: string;
-        uniteMesure?: string;
-        quantiteDemande?: string;
-    };
+    id?: number
+    article_id?: number | null
+    name?: string
+    uniteMesure: string
+    quantiteDemande: number
+    isNew: boolean
 }
 
 export interface RequisitionFormData {
-    titre: string,
-    objet: string,
-    date: Date | null,
-    items: any[],
-    demendeur_id: null,
-    enterprise_id: null,
-    newItems: [],
-    comment: null
+    titre: string
+    objet: string
+    date: string
+    items: RequisitionItem[]
+    comment?: string
+    demendeur_id?: number | null
+    enterprise_id?: number | null
 }
 
 export interface FormErrors {
@@ -33,11 +25,11 @@ export interface FormErrors {
 
 export interface StepProps {
     formData: RequisitionFormData
-    setFormData: (data: Partial<RequisitionFormData>) => void
-    errors: FormErrors
-    setErrors: (errors: FormErrors) => void
-    onNext: () => void
-    onPrevious: () => void
+    setFormData: React.Dispatch<React.SetStateAction<RequisitionFormData>>
+    errors?: FormErrors
+    setErrors?: React.Dispatch<React.SetStateAction<FormErrors>>
+    onNext?: () => void
+    onPrevious?: () => void
 }
 
 export interface StepIndicatorProps {
@@ -66,3 +58,7 @@ export interface RequisitionModalProps {
     onClose: () => void
 }
 
+export interface Step {
+    id: number
+    label: string
+}

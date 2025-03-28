@@ -8,11 +8,10 @@ import { useFetchArticles } from "../../../hooks/apiFeatures/useArticles"
 
 export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
     const [currentItem, setCurrentItem] = useState({
-        name: "", // For new items
-        article_id: null, // For existing items
-        // These fields are for UI display only
+        name: "",
+        article_id: null,
         uniteMesure: "",
-        quantiteDemande: "",
+        quantiteDemande: 0,
     })
     const [editingIndex, setEditingIndex] = useState<number | null>(null)
     const [itemErrors, setItemErrors] = useState<FormErrors>({})
@@ -56,9 +55,9 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
             // Add to newItems array
             newItemsArray.push({
                 name: currentItem.name,
+                uniteMesure: currentItem.uniteMesure,
                 // Store UI-only data in a separate field
                 _uiData: {
-                    uniteMesure: currentItem.uniteMesure,
                     quantiteDemande: currentItem.quantiteDemande
                 }
             })
@@ -67,8 +66,8 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
             itemsArray.push({
                 article_id: currentItem.article_id,
                 // Store UI-only data in a separate field
+                uniteMesure: currentItem.uniteMesure,
                 _uiData: {
-                    uniteMesure: currentItem.uniteMesure,
                     quantiteDemande: currentItem.quantiteDemande,
                     designation: articles.find(a => a.id === currentItem.article_id)?.name || ""
                 }
@@ -87,7 +86,7 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
             name: "",
             article_id: null,
             uniteMesure: "",
-            quantiteDemande: ""
+            quantiteDemande: 0
         })
         setEditingIndex(null)
         setItemErrors({})
@@ -119,8 +118,9 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
             if (editingIndex < newItemsArray.length) {
                 newItemsArray[editingIndex] = {
                     name: currentItem.name,
+                    uniteMesure: currentItem.uniteMesure,
                     _uiData: {
-                        uniteMesure: currentItem.uniteMesure,
+
                         quantiteDemande: currentItem.quantiteDemande
                     }
                 }
@@ -131,8 +131,9 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
             if (editingIndex < itemsArray.length) {
                 itemsArray[editingIndex] = {
                     article_id: currentItem.article_id,
+                    uniteMesure: currentItem.uniteMesure,
                     _uiData: {
-                        uniteMesure: currentItem.uniteMesure,
+
                         quantiteDemande: currentItem.quantiteDemande,
                         designation: articles.find(a => a.id === currentItem.article_id)?.name || ""
                     }
@@ -146,7 +147,7 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
             name: "",
             article_id: null,
             uniteMesure: "",
-            quantiteDemande: ""
+            quantiteDemande: 0
         })
         setEditingIndex(null)
         setItemErrors({})
@@ -159,7 +160,7 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                 setCurrentItem({
                     name: item.name,
                     article_id: null,
-                    uniteMesure: item._uiData?.uniteMesure || "",
+                    uniteMesure: item.uniteMesure || "",
                     quantiteDemande: item._uiData?.quantiteDemande || ""
                 })
                 setIsNewArticle(true)
@@ -170,7 +171,7 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                 setCurrentItem({
                     name: "",
                     article_id: item.article_id,
-                    uniteMesure: item._uiData?.uniteMesure || "",
+                    uniteMesure: item.uniteMesure || "",
                     quantiteDemande: item._uiData?.quantiteDemande || ""
                 })
                 setIsNewArticle(false)
@@ -200,12 +201,12 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
 
     // Combine both arrays for display purposes
     const getAllItems = () => {
-        const newItemsWithMeta = (formData.newItems || []).map((item, index) => ({
+        const newItemsWithMeta = (formData.newItems || []).map((item: any, index: any) => ({
             ...item,
             _isNew: true,
             _index: index,
             designation: item.name,
-            uniteMesure: item._uiData?.uniteMesure || "",
+            uniteMesure: item.uniteMesure || "",
             quantiteDemande: item._uiData?.quantiteDemande || ""
         }))
 
@@ -214,7 +215,7 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
             _isNew: false,
             _index: index,
             designation: item._uiData?.designation || articles.find(a => a.id === item.article_id)?.name || "Article inconnu",
-            uniteMesure: item._uiData?.uniteMesure || "",
+            uniteMesure: item.uniteMesure || "",
             quantiteDemande: item._uiData?.quantiteDemande || ""
         }))
 

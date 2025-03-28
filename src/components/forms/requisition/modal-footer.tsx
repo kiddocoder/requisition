@@ -1,5 +1,18 @@
-import { ArrowLeft, ArrowRight, Send } from "lucide-react"
-import { ModalFooterProps } from "../../../types/requisition"
+"use client"
+
+import type React from "react"
+import { Loader2 } from "lucide-react"
+
+interface ModalFooterProps {
+    step: number
+    totalSteps: number
+    onPrevious: () => void
+    onNext: () => void
+    onSubmit: () => void
+    onCancel: () => void
+    isNextDisabled?: boolean
+    isSubmitting?: boolean
+}
 
 export const ModalFooter: React.FC<ModalFooterProps> = ({
     step,
@@ -9,53 +22,40 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({
     onSubmit,
     onCancel,
     isNextDisabled = false,
+    isSubmitting = false,
 }) => {
     return (
-        <div className="border-t border-gray-200 p-4 flex justify-between bg-gray-50">
+        <div className="p-4 border-t border-gray-100 flex justify-between">
             <div>
                 {step > 1 && (
-                    <button
-                        type="button"
-                        onClick={onPrevious}
-                        className="px-4 py-2 text-gray-600 hover:text-gray-800 flex items-center gap-2"
-                    >
-                        <ArrowLeft size={18} />
-                        Retour
+                    <button type="button" onClick={onPrevious} disabled={isSubmitting}>
+                        Précédent
                     </button>
                 )}
             </div>
             <div className="flex gap-2">
-                <button
-                    type="button"
-                    onClick={onCancel}
-                    className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
-                >
+                <button type="button" onClick={onCancel} disabled={isSubmitting}>
                     Annuler
                 </button>
+
                 {step < totalSteps ? (
-                    <button
-                        type="button"
-                        onClick={onNext}
-                        disabled={isNextDisabled}
-                        className={`px-4 py-2 rounded-md flex items-center gap-2 ${isNextDisabled
-                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                            : "bg-blue-600 text-white hover:bg-blue-700"
-                            }`}
-                    >
+                    <button type="button" onClick={onNext} disabled={isNextDisabled || isSubmitting}>
                         Suivant
-                        <ArrowRight size={18} />
                     </button>
                 ) : (
-                    <button
-                        type="button"
-                        onClick={onSubmit}
-                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center gap-2"
-                    >
-                        <Send size={18} />
-                        Envoyer la Réquisition
+                    <button type="button" onClick={onSubmit} disabled={isSubmitting}>
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Soumission...
+                            </>
+                        ) : (
+                            "Soumettre"
+                        )}
                     </button>
                 )}
             </div>
         </div>
     )
 }
+

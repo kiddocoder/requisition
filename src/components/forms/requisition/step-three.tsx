@@ -11,13 +11,13 @@ export const StepThree: React.FC<StepProps> = ({ formData, setFormData }) => {
     const getAllItems = () => {
         const newItemsWithMeta = (formData.newItems || []).map(item => ({
             designation: item.name,
-            uniteMesure: item._uiData?.uniteMesure || "",
-            quantiteDemande: item._uiData?.quantiteDemande || ""
+            uniteMesure: item.uniteMesure || "",
+            quantiteDemande: parseInt(item._uiData?.quantiteDemande || 0)
         }))
 
         const existingItemsWithMeta = (formData.items || []).map(item => ({
             designation: item._uiData?.designation || "Article existant",
-            uniteMesure: item._uiData?.uniteMesure || "",
+            uniteMesure: item.uniteMesure || "",
             quantiteDemande: item._uiData?.quantiteDemande || ""
         }))
 

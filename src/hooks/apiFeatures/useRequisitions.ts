@@ -14,8 +14,9 @@ export const useAddRequisition = () =>{
         mutationKey:["requisitions"],
         mutationFn:addRequisition,
         onSuccess:() =>{
-            query.invalidateQueries(["requisitions"])
+            query.invalidateQueries({ queryKey: ["requisitions"] })
         },
+    
     })
     return {mutateAsync}
 }

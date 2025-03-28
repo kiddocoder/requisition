@@ -1,29 +1,36 @@
-import { useState } from "react";
-import { FormErrors, RequisitionModalProps } from "../../../types/requisition";
-import { StepIndicator } from "../step-indicator";
-import { ModalFooter } from "./modal-footer";
-import { ModalHeader } from "./modal-header";
-import { StepOne } from "./step-one";
-import { StepThree } from "./step-three";
-import { StepTwo } from "./step-two";
+"use client"
 
-import { useAddRequisition } from "../../../hooks/apiFeatures/useRequisitions";
+import type React from "react"
+
+import { useState } from "react"
+import type { FormErrors, RequisitionFormData, RequisitionModalProps, Step } from "../../../types/requisition"
+import { StepIndicator } from "../step-indicator"
+import { ModalFooter } from "./modal-footer"
+import { ModalHeader } from "./modal-header"
+import { StepOne } from "./step-one"
+import { StepThree } from "./step-three"
+import { StepTwo } from "./step-two"
+
+import { useAddRequisition } from "../../../hooks/apiFeatures/useRequisitions"
+
 
 export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) => {
     const [step, setStep] = useState(1)
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [formErrors, setFormErrors] = useState<FormErrors>({})
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const addRequisitionMutation = useAddRequisition()
 
-    const [formData, setFormData] = useState({
+    // Initialisation avec une structure de données simplifiée
+    const [formData, setFormData] = useState<RequisitionFormData>({
         titre: "",
         objet: "",
-        date: new Date().toDateString(),
+        date: new Date().toISOString().split("T")[0], // Format YYYY-MM-DD pour l'input date
         items: [],
     })
 
-    const steps = [
+    const steps: Step[] = [
         { id: 1, label: "Réquisition" },
         { id: 2, label: "Articles" },
         { id: 3, label: "Révision" },
@@ -36,11 +43,22 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) =
             if (!formData.titre) newErrors.titre = "Le titre est requis"
             if (!formData.objet) newErrors.objet = "L'objet de la réquisition est requis"
             if (!formData.date) newErrors.date = "La Date de demande est requise"
-
-            if (Object.keys(newErrors).length > 0) {
-                setFormErrors(newErrors)
-                return false
+        } else if (currentStep === 2) {
+            if (formData.items.length === 0) {
+                // Afficher un toast au lieu de bloquer la progression
+                // toast({
+                //     title: "Attention",
+                //     description: "Aucun article n'a été ajouté à la réquisition",
+                //     variant: "warning",
+                // })
+                // On permet quand même de passer à l'étape suivante
+                return true
             }
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setFormErrors(newErrors)
+            return false
         }
 
         return true
@@ -59,15 +77,59 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) =
     }
 
     const handleSubmit = async () => {
-        if (!validateStep(step)) return
+        try {
+            // Préparer les données pour l'API
+            const apiData = prepareDataForApi(formData)
 
-        console.log("Réquisition soumise:", formData)
+            // Soumettre les données
+            setIsSubmitting(true)
+            await addRequisitionMutation.mutateAsync(apiData).finally(() => {
+                setIsSubmitting(false)
+            })
 
-        await addRequisitionMutation.mutateAsync(formData)
+            // Notification de succès
+            // toast({
+            //     title: "Succès",
+            //     description: "Réquisition soumise avec succès!",
+            //     variant: "success",
+            // })
 
-        // Afficher une notification de succès
-        alert("Réquisition soumise avec succès!")
-        // onClose()
+            // Fermer le modal
+            onClose()
+        } catch (error) {
+            // toast({
+            //     title: "Erreur",
+            //     description: "Une erreur est survenue lors de la soumission",
+            //     variant: "destructive",
+            // })
+            console.error("Erreur lors de la soumission:", error)
+        }
+    }
+
+    // Fonction pour préparer les données avant envoi à l'API
+    const prepareDataForApi = (data: RequisitionFormData) => {
+        // Séparer les nouveaux articles et les articles existants
+        const newItems = data.items
+            .filter((item) => item.isNew)
+            .map(({ isNew, ...item }) => ({
+                name: item.name,
+                uniteMesure: item.uniteMesure,
+                quantiteDemande: item.quantiteDemande,
+            }))
+
+        const existingItems = data.items
+            .filter((item) => !item.isNew)
+            .map(({ isNew, ...item }) => ({
+                article_id: item.article_id,
+                uniteMesure: item.uniteMesure,
+                quantiteDemande: item.quantiteDemande,
+            }))
+
+        return {
+            ...data,
+            newItems,
+            items: existingItems,
+        }
     }
 
     const toggleFullScreen = () => {
@@ -76,9 +138,8 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) =
 
     const isNextDisabled = () => {
         if (step === 1) {
-            return !formData.titre || !formData.objet
+            return !formData.titre || !formData.objet || !formData.date
         }
-        // Ajoutez des conditions pour les autres étapes si nécessaire
         return false
     }
 
@@ -89,7 +150,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) =
             errors: formErrors,
             setErrors: setFormErrors,
             onNext: nextStep,
-            onPrevious: prevStep
+            onPrevious: prevStep,
         }
 
         switch (step) {
@@ -110,7 +171,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) =
         >
             <div
                 className={`bg-white rounded-lg shadow-xl w-full overflow-hidden flex flex-col transition-all duration-300 ease-in-out 
-        ${isFullScreen ? "h-full max-w-full" : "max-w-3xl max-h-[90vh]"}`}
+                ${isFullScreen ? "h-full max-w-full" : "max-w-3xl max-h-[90vh]"}`}
             >
                 <ModalHeader
                     title="Formulaire de Réquisition"
@@ -131,8 +192,10 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) =
                     onSubmit={handleSubmit}
                     onCancel={onClose}
                     isNextDisabled={isNextDisabled()}
+                    isSubmitting={isSubmitting}
                 />
             </div>
         </div>
     )
 }
+

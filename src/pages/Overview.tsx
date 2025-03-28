@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { RequisitionModal } from "../components/forms/requisition/RequistionModal"
 import {
-    Plus,
     Trash2,
     Edit2,
     DollarSign,
@@ -107,7 +106,7 @@ function Overview() {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {requisitions?.map((req) => (
+                                {requisitions?.map((req: any) => (
                                     <tr key={req.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{req.id}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{req.date.toLocaleString()}</td>

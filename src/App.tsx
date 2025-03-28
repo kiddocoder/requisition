@@ -67,6 +67,7 @@ function App(): React.ReactElement {
 
   ]
   )
+
   return (
     <QueryClientProvider client={new QueryClient()}>
       <RouterProvider router={router} />

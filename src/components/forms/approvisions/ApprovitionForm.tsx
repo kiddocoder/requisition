@@ -6,28 +6,6 @@ import { Plus, Trash2, FileText, X, Check, AlertTriangle, Package, CreditCard, D
 import type { RequisitionItem } from "../../../types/requisition"
 import { useNavigate } from "react-router-dom"
 
-// Données simulées pour les articles de réquisition disponibles
-const availableRequisitions = [
-    {
-        id: "req-001",
-        name: "Fournitures de bureau",
-        items: [
-            { id: "item-001", name: "Papier A4", description: "Ramette de papier 500 feuilles", quantity: 10 },
-            { id: "item-002", name: "Stylos bleus", description: "Boîte de 50 stylos", quantity: 2 },
-            { id: "item-003", name: "Classeurs", description: "Classeurs à levier format A4", quantity: 5 },
-        ]
-    },
-    {
-        id: "req-002",
-        name: "Équipement informatique",
-        items: [
-            { id: "item-004", name: "Écran 24 pouces", description: "Écran LED Full HD", quantity: 2 },
-            { id: "item-005", name: "Clavier sans fil", description: "Clavier ergonomique", quantity: 3 },
-            { id: "item-006", name: "Souris optique", description: "Souris sans fil", quantity: 3 },
-        ]
-    }
-]
-
 // Types de transaction disponibles
 const transactionTypes = [
     {
@@ -112,12 +90,6 @@ function ApprovitionForm({ onClose, requisition }) {
         return sum + totalPrice
     }, 0)
 
-    // Gérer la sélection d'une réquisition
-    const handleRequisitionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedRequisition(e.target.value)
-        setSelectedItems([])
-    }
-
     // Ajouter un article à la liste
     const handleAddItem = (item: any) => {
         // Vérifier si l'article est déjà dans la liste
@@ -141,11 +113,11 @@ function ApprovitionForm({ onClose, requisition }) {
     }
 
     // Mettre à jour le prix unitaire d'un article
-    const handleUnitPriceChange = (itemId: string, price: number) => {
+    const handleUnitPriceChange = (itemId: number, price: number) => {
         setSelectedItems(selectedItems.map(item => {
             if (item.id === itemId) {
                 const unitPrice = price
-                const totalPrice = unitPrice * item.quantity
+                const totalPrice = unitPrice * item.quantiteDemande
                 return { ...item, unitPrice, totalPrice }
             }
             return item
@@ -402,7 +374,7 @@ function ApprovitionForm({ onClose, requisition }) {
                                                     type="number"
                                                     min="0"
                                                     step="0.01"
-                                                    value={item.unitPrice || 0}
+                                                    value={item?.unitPrice || 0}
                                                     onChange={(e) => handleUnitPriceChange(item.id, parseFloat(e.target.value) || 0)}
                                                     className="w-24 p-1.5 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 />
