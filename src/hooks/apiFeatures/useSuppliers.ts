@@ -7,7 +7,6 @@ export const useGetSuppliers = () =>{
     return useQuery({
         queryKey:['suppliers'],
         queryFn:getSuppliers,
-
     })
 }
 

@@ -1,12 +1,13 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { StepIndicator } from "../step-indicator"
 import { Plus, Trash2, FileText, X, Check, AlertTriangle, CheckCircle } from "lucide-react"
 import SelectSearch, { type SelectOption } from "../../ui/selectSearch"
 import { useGetSuppliers, useAddSupplier } from "../../../hooks/apiFeatures/useSuppliers"
-import { AddSupplier } from "../../../api/suppliers"
+import { AddSupplier, getSuppliers } from "../../../api/suppliers"
+import { label } from "framer-motion/client"
 
 // Types
 interface Article {
@@ -82,7 +83,24 @@ function ApprovitionForm({ onClose, requisition }: any) {
         { id: 3, label: "Confirmation" },
     ]
 
-    const { data: suppliers = [] } = useGetSuppliers();
+    const [suppliers, setSuppliers] = useState([]);
+
+    const [supplierOptions, setSupplierOptions] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchSuppliers = async () => {
+            try {
+                const suppliers = await getSuppliers();
+                setSuppliers(suppliers);
+                const options = suppliers.map((s: any) => ({ value: s.id, label: s.name }));
+                setSupplierOptions(options);
+            } catch (error) {
+                console.error('Error fetching suppliers:', error);
+            }
+        };
+        fetchSuppliers();
+    }, []);
+
 
     // États du formulaire
     const [currentStep, setCurrentStep] = useState(1)
@@ -164,13 +182,13 @@ function ApprovitionForm({ onClose, requisition }: any) {
             const res = await AddSupplier({ name: name })
 
             // Créer le nouveau fournisseur
-            const newSupplier: SelectOption = {
+            const newSupplier = {
                 value: res.id,
                 label: res.name,
             }
 
             // Ajouter le fournisseur à la liste
-            suppliers.push({ ...newSupplier })
+            setSupplierOptions([...supplierOptions, newSupplier])
 
             // Afficher un message de succès
             showModalAlert("Succès", `Le fournisseur "${name}" a été ajouté avec succès.`, "success")
@@ -420,7 +438,8 @@ function ApprovitionForm({ onClose, requisition }: any) {
                                                     </td>
                                                     <td className="px-4 py-3 text-sm text-gray-700">
                                                         <SelectSearch
-                                                            options={suppliers}
+                                                            key={item.id}
+                                                            options={supplierOptions}
                                                             value={
                                                                 item.supplier_id ? suppliers.find((s) => s.value === item.supplier_id) || null : null
                                                             }
