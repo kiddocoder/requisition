@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from "react"
-import { Search, ChevronDown, ChevronUp, X, Plus } from "lucide-react"
+import { Search, ChevronDown, ChevronUp, X, Plus } from 'lucide-react'
 import { cn } from "../lib/cn"
 
 export type SelectOption = {
@@ -36,6 +36,7 @@ const SelectSearch = ({
     const [searchTerm, setSearchTerm] = useState("")
     const [showAddNew, setShowAddNew] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
+    const dropdownRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
     const addNewInputRef = useRef<HTMLInputElement>(null)
 
@@ -47,7 +48,12 @@ const SelectSearch = ({
     // Handle outside click to close dropdown
     useEffect(() => {
         const handleOutsideClick = (e: MouseEvent) => {
-            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+            if (
+                containerRef.current &&
+                !containerRef.current.contains(e.target as Node) &&
+                dropdownRef.current &&
+                !dropdownRef.current.contains(e.target as Node)
+            ) {
                 setIsOpen(false)
                 setShowAddNew(false)
                 setSearchTerm("")
@@ -57,6 +63,33 @@ const SelectSearch = ({
         document.addEventListener("mousedown", handleOutsideClick)
         return () => document.removeEventListener("mousedown", handleOutsideClick)
     }, [])
+
+    // Position dropdown when it opens
+    useEffect(() => {
+        if (isOpen && containerRef.current && dropdownRef.current) {
+            const containerRect = containerRef.current.getBoundingClientRect()
+            const dropdownEl = dropdownRef.current
+
+            // Set width to match container
+            dropdownEl.style.width = `${containerRect.width}px`
+
+            // Calculate position
+            const spaceBelow = window.innerHeight - containerRect.bottom
+            const spaceAbove = containerRect.top
+            const dropdownHeight = Math.min(300, dropdownEl.scrollHeight) // Max height of dropdown
+
+            // Position below if enough space, otherwise above
+            if (spaceBelow >= dropdownHeight || spaceBelow >= spaceAbove) {
+                dropdownEl.style.top = `${containerRect.bottom + window.scrollY + 5}px`
+                dropdownEl.style.bottom = 'auto'
+            } else {
+                dropdownEl.style.bottom = `${window.innerHeight - containerRect.top + window.scrollY + 5}px`
+                dropdownEl.style.top = 'auto'
+            }
+
+            dropdownEl.style.left = `${containerRect.left + window.scrollX}px`
+        }
+    }, [isOpen, filteredOptions, showAddNew])
 
     // Focus on search input when dropdown opens
     useEffect(() => {
@@ -129,6 +162,7 @@ const SelectSearch = ({
                 <div className="flex items-center">
                     {value && (
                         <button
+                            type="button"
                             onClick={handleClearSelection}
                             className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
                             disabled={disabled}
@@ -143,16 +177,12 @@ const SelectSearch = ({
             {/* Dropdown menu */}
             {isOpen && (
                 <div
-                    className="fixed z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
-                    style={{
-                        width: containerRef.current ? containerRef.current.offsetWidth + "px" : "100%",
-                        left: containerRef.current ? containerRef.current.getBoundingClientRect().left + "px" : "0",
-                        top: containerRef.current ? containerRef.current.getBoundingClientRect().bottom + 5 + "px" : "0",
-                    }}
+                    ref={dropdownRef}
+                    className="fixed z-[9999] bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
                 >
                     {/* Search box */}
                     {isSearchable && (
-                        <div className="sticky top-0 p-2 bg-white border-b border-gray-200">
+                        <div className="sticky top-0 p-2 bg-white border-b border-gray-200 z-10">
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none">
                                     <Search size={16} className="text-gray-400" />
@@ -184,14 +214,14 @@ const SelectSearch = ({
                                 className="flex items-center gap-2 p-2.5 text-blue-600 hover:bg-blue-50 cursor-pointer"
                             >
                                 <Plus size={16} />
-                                <span className="font-medium">Add new item</span>
+                                <span className="font-medium">Ajouter une option</span>
                             </div>
                         )
                     )}
 
                     {/* No results message */}
                     {filteredOptions.length === 0 && !showAddNew && (
-                        <div className="p-3 text-sm text-center text-gray-500">No results found</div>
+                        <div className="p-3 text-sm text-center text-gray-500">Aucun résultat trouvé</div>
                     )}
 
                     {/* Options list */}
@@ -229,6 +259,12 @@ const NewItemInput = React.forwardRef<HTMLInputElement, NewItemInputProps>(({ on
         }
     }
 
+    const handleSubmitClick = () => {
+        if (value.trim()) {
+            onSubmit(value)
+        }
+    }
+
     return (
         <div className="p-2 border-b border-gray-200" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-2 w-full">
@@ -239,16 +275,17 @@ const NewItemInput = React.forwardRef<HTMLInputElement, NewItemInputProps>(({ on
                     onChange={(e) => setValue(e.target.value)}
                     onKeyDown={handleKeyDown}
                     className="py-2 w-full px-3 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter new item..."
+                    placeholder="Entrer le nom du fournisseur..."
                 />
                 {/* <button
-                    onClick={() => onSubmit(value)}
+                    type="button"
+                    onClick={handleSubmitClick}
                     className="p-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                     <Plus size={16} />
-                </button>
-                */}
+                </button> */}
                 <button
+                    type="button"
                     onClick={onCancel}
                     className="p-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                 >
@@ -262,4 +299,3 @@ const NewItemInput = React.forwardRef<HTMLInputElement, NewItemInputProps>(({ on
 NewItemInput.displayName = "NewItemInput"
 
 export default SelectSearch
-

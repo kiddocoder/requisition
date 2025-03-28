@@ -14,7 +14,7 @@ export const useAddArticle = (data: any) => {
     mutationKey: ["articles"],
     mutationFn: () => addArticle(data),
     onSuccess: () => {
-      query.invalidateQueries(['articles'])
+      query.invalidateQueries({queryKey:['articles']})
     },
   });
 };

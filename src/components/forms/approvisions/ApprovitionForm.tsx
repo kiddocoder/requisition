@@ -1,13 +1,12 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, use } from "react"
 import { StepIndicator } from "../step-indicator"
 import { Plus, Trash2, FileText, X, Check, AlertTriangle, CheckCircle } from "lucide-react"
 import SelectSearch, { type SelectOption } from "../../ui/selectSearch"
-import { useGetSuppliers, useAddSupplier } from "../../../hooks/apiFeatures/useSuppliers"
 import { AddSupplier, getSuppliers } from "../../../api/suppliers"
-import { label } from "framer-motion/client"
+import { useAddProcurement } from "../../../hooks/apiFeatures/useProcurement"
 
 // Types
 interface Article {
@@ -83,24 +82,29 @@ function ApprovitionForm({ onClose, requisition }: any) {
         { id: 3, label: "Confirmation" },
     ]
 
-    const [suppliers, setSuppliers] = useState([]);
+    const [suppliers, setSuppliers] = useState<any[]>([])
+    const [supplierOptions, setSupplierOptions] = useState<SelectOption[]>([])
+    const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(true)
 
-    const [supplierOptions, setSupplierOptions] = useState<any[]>([]);
+    const doProcurement = useAddProcurement();
 
     useEffect(() => {
         const fetchSuppliers = async () => {
+            setIsLoadingSuppliers(true)
             try {
-                const suppliers = await getSuppliers();
-                setSuppliers(suppliers);
-                const options = suppliers.map((s: any) => ({ value: s.id, label: s.name }));
-                setSupplierOptions(options);
+                const suppliersData = await getSuppliers()
+                setSuppliers(suppliersData)
+                const options = suppliersData.map((s: any) => ({ value: s.id, label: s.name }))
+                setSupplierOptions(options)
             } catch (error) {
-                console.error('Error fetching suppliers:', error);
+                console.error("Error fetching suppliers:", error)
+                showModalAlert("Erreur", "Impossible de charger la liste des fournisseurs.", "error")
+            } finally {
+                setIsLoadingSuppliers(false)
             }
-        };
-        fetchSuppliers();
-    }, []);
-
+        }
+        fetchSuppliers()
+    }, [])
 
     // États du formulaire
     const [currentStep, setCurrentStep] = useState(1)
@@ -113,6 +117,7 @@ function ApprovitionForm({ onClose, requisition }: any) {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isAddingSupplier, setIsAddingSupplier] = useState(false)
     const user = { id: null, name: null }
+
     // Référence pour l'input de fichier
     const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -175,26 +180,33 @@ function ApprovitionForm({ onClose, requisition }: any) {
 
     // Ajouter un nouveau fournisseur
     const handleAddSupplier = async (name: string) => {
+        if (!name.trim()) {
+            showModalAlert("Erreur", "Le nom du fournisseur ne peut pas être vide.", "error")
+            return null
+        }
+
         setIsAddingSupplier(true)
 
         try {
-            // Simuler un appel API pour ajouter un fournisseur
+            // Appel API pour ajouter un fournisseur
             const res = await AddSupplier({ name: name })
 
             // Créer le nouveau fournisseur
-            const newSupplier = {
+            const newSupplier: SelectOption = {
                 value: res.id,
                 label: res.name,
             }
 
             // Ajouter le fournisseur à la liste
-            setSupplierOptions([...supplierOptions, newSupplier])
+            setSupplierOptions((prev) => [...prev, newSupplier])
+            setSuppliers((prev) => [...prev, { id: res.id, name: res.name }])
 
             // Afficher un message de succès
             showModalAlert("Succès", `Le fournisseur "${name}" a été ajouté avec succès.`, "success")
 
             return newSupplier
         } catch (error) {
+            console.error("Erreur lors de l'ajout du fournisseur:", error)
             showModalAlert("Erreur", "Une erreur est survenue lors de l'ajout du fournisseur.", "error")
             return null
         } finally {
@@ -320,7 +332,7 @@ function ApprovitionForm({ onClose, requisition }: any) {
             const apiData = prepareDataForApi()
 
             // Simuler un appel API
-            await new Promise((resolve) => setTimeout(resolve, 1000))
+            doProcurement.mutateAsync(apiData);
 
             console.log("Données envoyées à l'API:", apiData)
 
@@ -390,11 +402,12 @@ function ApprovitionForm({ onClose, requisition }: any) {
                                                     </td>
                                                     <td className="px-4 py-3 text-sm">
                                                         <button
+                                                            type="button"
                                                             onClick={() => handleAddItem(item)}
                                                             className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700"
                                                         >
                                                             <Plus size={16} className="mr-1" />
-
+                                                            Ajouter
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -437,23 +450,29 @@ function ApprovitionForm({ onClose, requisition }: any) {
                                                         {Number.parseInt(item.quantiteDemande.toString())}
                                                     </td>
                                                     <td className="px-4 py-3 text-sm text-gray-700">
-                                                        <SelectSearch
-                                                            key={item.id}
-                                                            options={supplierOptions}
-                                                            value={
-                                                                item.supplier_id ? suppliers.find((s) => s.value === item.supplier_id) || null : null
-                                                            }
-                                                            onChange={(supplier) => handleSupplierChange(item.id, supplier)}
-                                                            onAddNewItem={async (name) => {
-                                                                const newSupplier = await handleAddSupplier(name)
-                                                                if (newSupplier) {
-                                                                    handleSupplierChange(item.id, newSupplier)
+                                                        {isLoadingSuppliers ? (
+                                                            <div className="animate-pulse h-8 bg-gray-200 rounded w-full"></div>
+                                                        ) : (
+                                                            <SelectSearch
+                                                                key={`supplier-${item.id}`}
+                                                                options={supplierOptions}
+                                                                value={
+                                                                    item.supplier_id
+                                                                        ? supplierOptions.find((s) => s.value === item.supplier_id) || null
+                                                                        : null
                                                                 }
-                                                            }}
-                                                            placeholder="Sélectionner un fournisseur"
-                                                            isSearchable={true}
-                                                            disabled={isAddingSupplier}
-                                                        />
+                                                                onChange={(supplier) => handleSupplierChange(item.id, supplier)}
+                                                                onAddNewItem={async (name) => {
+                                                                    const newSupplier = await handleAddSupplier(name)
+                                                                    if (newSupplier) {
+                                                                        handleSupplierChange(item.id, newSupplier)
+                                                                    }
+                                                                }}
+                                                                placeholder="Sélectionner un fournisseur"
+                                                                isSearchable={true}
+                                                                disabled={isAddingSupplier}
+                                                            />
+                                                        )}
                                                     </td>
                                                     <td className="px-4 py-3 text-sm text-gray-700">
                                                         <div>
@@ -493,11 +512,12 @@ function ApprovitionForm({ onClose, requisition }: any) {
                                                     </td>
                                                     <td className="px-4 py-3 text-sm">
                                                         <button
+                                                            type="button"
                                                             onClick={() => handleRemoveItem(item.id)}
                                                             className="inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700"
                                                         >
                                                             <Trash2 size={16} className="mr-1" />
-
+                                                            Retirer
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -541,7 +561,7 @@ function ApprovitionForm({ onClose, requisition }: any) {
                                         <tr key={item.id} className="hover:bg-blue-50">
                                             <td className="px-4 py-3 text-sm text-gray-700">{item.article.name}</td>
                                             <td className="px-4 py-3 text-sm text-gray-700">
-                                                {suppliers.find((s) => s.value === item.supplier_id)?.label || "-"}
+                                                {supplierOptions.find((s) => s.value === item.supplier_id)?.label || "-"}
                                             </td>
                                             <td className="px-4 py-3 text-sm text-gray-700">
                                                 {Number.parseInt(item.quantiteDemande.toString())}
@@ -731,7 +751,7 @@ function ApprovitionForm({ onClose, requisition }: any) {
                                             <td className="px-4 py-3 text-sm text-gray-700">{index + 1}</td>
                                             <td className="px-4 py-3 text-sm text-gray-700">{item.article.name}</td>
                                             <td className="px-4 py-3 text-sm text-gray-700">
-                                                {suppliers.find((s) => s.value === item.supplier_id)?.label || "-"}
+                                                {supplierOptions.find((s) => s.value === item.supplier_id)?.label || "-"}
                                             </td>
                                             <td className="px-4 py-3 text-sm text-gray-700">
                                                 {transactionTypes.find((t) => t.type === item.transaction_type)?.name || "-"}
@@ -753,7 +773,7 @@ function ApprovitionForm({ onClose, requisition }: any) {
                                     ))}
                                     <tr className="bg-blue-50">
                                         <td
-                                            colSpan={selectedItems.some((item) => item.transaction_type === "credit") ? 7 : 6}
+                                            colSpan={selectedItems.some((item) => item.transaction_type === "credit") ? 6 : 5}
                                             className="px-4 py-3 text-right text-sm font-medium text-blue-800"
                                         >
                                             Total
@@ -812,7 +832,7 @@ function ApprovitionForm({ onClose, requisition }: any) {
         }
 
         return (
-            <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="fixed inset-0 z-[9999] overflow-y-auto">
                 <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                     <div className="fixed inset-0 transition-opacity" aria-hidden="true">
                         <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
@@ -871,10 +891,9 @@ function ApprovitionForm({ onClose, requisition }: any) {
     }
 
     return (
-        <div className={`mx-auto bg-gray-50 rounded-lg shadow-lg w-full max-w-[1024px]  `}>
-            <div className="">
+        <div className="w-full max-w-6xl  mx-auto bg-gray-50 rounded-lg shadow-lg overflow-hidden">
+            <div className="max-h-[80vh] overflow-y-auto">
                 <StepIndicator currentStep={currentStep} steps={steps} />
-
                 {renderStepContent()}
             </div>
             <div className="px-6 py-4 bg-gray-100 border-t border-gray-200 flex justify-between">
