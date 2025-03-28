@@ -1,5 +1,5 @@
 import ApprovitionForm from "../components/forms/approvisions/ApprovitionForm";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
     Trash2,
     DollarSign,
@@ -10,17 +10,10 @@ import {
 } from 'lucide-react';
 import { useFetchRequisitions } from "../hooks/apiFeatures/useRequisitions";
 
-interface Requisition {
-    id: number;
-    date: string;
-    title: string;
-    total: number;
-    status: string;
-}
 
 function Approvisionnement() {
     const [isModalOpen, setIsModalOpen] = useState<Boolean>(false)
-    const { data: requisitions = [], isLoading: isReqLoading } = useFetchRequisitions()
+    const { data: requisitions = [] } = useFetchRequisitions()
     const [selectedRequisition, setSelectedRequisition] = useState(null);
 
     const handleOpenModal = (req: any) => {
@@ -110,7 +103,7 @@ function Approvisionnement() {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {requisitions.map((req) => (
+                                {requisitions.map((req: any) => (
                                     <tr key={req.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{req.id}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{req.date}</td>
@@ -154,7 +147,7 @@ function Approvisionnement() {
 
             {isModalOpen && (
                 <div
-                    className={`fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-300 p-4`}
+                    className={`fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center  z-50 transition-all duration-300 p-4`}
                 >
 
                     <ApprovitionForm onClose={() => setIsModalOpen(false)} requisition={selectedRequisition} />

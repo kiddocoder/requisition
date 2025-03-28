@@ -2,6 +2,8 @@ import type React from "react"
 import { Package } from 'lucide-react'
 import { StepProps } from "../../../types/requisition"
 
+
+
 export const StepOne: React.FC<StepProps> = ({ formData, setFormData, errors }) => {
     const handleInputChange = (field: string, value: string) => {
         setFormData({ ...formData, [field]: value })
@@ -53,8 +55,8 @@ export const StepOne: React.FC<StepProps> = ({ formData, setFormData, errors }) 
                 </div>
 
                 {/* Hidden fields for demendeur_id and enterprise_id */}
-                <input type="hidden" name="demendeur_id" value={formData?.demendeur_id || null} />
-                <input type="hidden" name="enterprise_id" value={formData?.enterprise_id || null} />
+                <input type="hidden" name="demendeur_id" value={formData?.demendeur_id || undefined} />
+                <input type="hidden" name="enterprise_id" value={formData?.enterprise_id || undefined} />
             </div>
         </div>
     )

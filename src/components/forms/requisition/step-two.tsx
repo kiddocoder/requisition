@@ -1,225 +1,133 @@
 "use client"
 
 import type React from "react"
-import { Package, Plus, Check, FileText, Edit2, Trash2 } from 'lucide-react'
-import type { FormErrors, StepProps } from "../../../types/requisition"
+import { Package, Plus, Check, FileText, Edit2, Trash2 } from "lucide-react"
 import { useState } from "react"
-import { useFetchArticles } from "../../../hooks/apiFeatures/useArticles"
+import type { Article, FormErrors, RequisitionItem, StepProps } from "../../../types/requisition"
 
-export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
-    const [currentItem, setCurrentItem] = useState({
-        name: "",
+export const StepTwo: React.FC<StepProps> = ({ formData, setFormData, articles }) => {
+
+    const initialItemState: RequisitionItem = {
         article_id: null,
+        name: "",
         uniteMesure: "",
         quantiteDemande: 0,
-    })
+        isNew: true,
+    }
+
+    const [currentItem, setCurrentItem] = useState<RequisitionItem>(initialItemState)
     const [editingIndex, setEditingIndex] = useState<number | null>(null)
     const [itemErrors, setItemErrors] = useState<FormErrors>({})
-    const [isNewArticle, setIsNewArticle] = useState(true)
 
-    const { data: articles = [] } = useFetchArticles();
 
-    const handleInputChange = (field: string, value: string) => {
-        const updatedItem = { ...currentItem, [field]: value }
+    const handleInputChange = (field: keyof RequisitionItem, value: any) => {
+        setCurrentItem((prev: any) => {
+            const updated = { ...prev }
+
+            if (field === "article_id") {
+                // Si on sélectionne un article existant
+                const articleId = value ? Number.parseInt(value, 10) : null
+                updated.article_id = articleId
+                updated.isNew = articleId === null
+
+                // Pré-remplir l'unité de mesure si disponible
+                if (articleId) {
+                    const selectedArticle = articles?.find((a: Article) => a.id === articleId)
+                    if (selectedArticle) {
+                        updated.uniteMesure = selectedArticle.uniteMesure || ""
+                        updated.name = selectedArticle.name
+                    }
+                }
+            } else if (field === "quantiteDemande") {
+                updated.quantiteDemande = value === "" ? 0 : Number.parseInt(value, 10)
+            } else {
+                updated[field] = value
+            }
+
+            return updated
+        })
+
         // Effacer l'erreur si le champ est rempli
         if (value && itemErrors[field]) {
             setItemErrors({ ...itemErrors, [field]: null })
         }
+    }
 
-        setCurrentItem(updatedItem)
+    const validateItem = (): FormErrors => {
+        const errors: FormErrors = {}
+
+        if (currentItem.isNew) {
+            if (!currentItem.name) errors.name = "Le nom est requis"
+        } else {
+            if (!currentItem.article_id) errors.article_id = "L'article est requis"
+        }
+
+        if (!currentItem.uniteMesure) errors.uniteMesure = "L'unité de mesure est requise"
+        if (!currentItem.quantiteDemande) errors.quantiteDemande = "La quantité est requise"
+
+        return errors
     }
 
     const addItem = () => {
-        // Validation des champs requis
-        const newErrors: FormErrors = {}
+        const errors = validateItem()
 
-        if (isNewArticle) {
-            if (!currentItem.name) newErrors.name = "Requis"
-        } else {
-            if (!currentItem.article_id) newErrors.article_id = "Requis"
-        }
-
-        if (!currentItem.uniteMesure) newErrors.uniteMesure = "Requis"
-        if (!currentItem.quantiteDemande) newErrors.quantiteDemande = "Requis"
-
-        if (Object.keys(newErrors).length > 0) {
-            setItemErrors(newErrors)
+        if (Object.keys(errors).length > 0) {
+            setItemErrors(errors)
             return
         }
 
-        // Prepare the item based on whether it's new or existing
-        let newItemsArray = [...(formData.newItems || [])]
-        let itemsArray = [...(formData.items || [])]
-
-        if (isNewArticle) {
-            // Add to newItems array
-            newItemsArray.push({
-                name: currentItem.name,
-                uniteMesure: currentItem.uniteMesure,
-                // Store UI-only data in a separate field
-                _uiData: {
-                    quantiteDemande: currentItem.quantiteDemande
-                }
-            })
-        } else {
-            // Add to items array
-            itemsArray.push({
-                article_id: currentItem.article_id,
-                // Store UI-only data in a separate field
-                uniteMesure: currentItem.uniteMesure,
-                _uiData: {
-                    quantiteDemande: currentItem.quantiteDemande,
-                    designation: articles.find(a => a.id === currentItem.article_id)?.name || ""
-                }
-            })
-        }
-
-        // Update formData with both arrays
-        setFormData({
-            ...formData,
-            newItems: newItemsArray,
-            items: itemsArray
-        })
+        setFormData((prev: any) => ({
+            ...prev,
+            items: [...prev.items, { ...currentItem }],
+        }))
 
         // Réinitialiser le formulaire
-        setCurrentItem({
-            name: "",
-            article_id: null,
-            uniteMesure: "",
-            quantiteDemande: 0
-        })
-        setEditingIndex(null)
+        setCurrentItem(initialItemState)
         setItemErrors({})
     }
 
     const updateItem = () => {
         if (editingIndex === null) return
 
-        // Validation des champs requis
-        const newErrors: FormErrors = {}
+        const errors = validateItem()
 
-        if (isNewArticle) {
-            if (!currentItem.name) newErrors.name = "Requis"
-        } else {
-            if (!currentItem.article_id) newErrors.article_id = "Requis"
-        }
-
-        if (!currentItem.uniteMesure) newErrors.uniteMesure = "Requis"
-        if (!currentItem.quantiteDemande) newErrors.quantiteDemande = "Requis"
-
-        if (Object.keys(newErrors).length > 0) {
-            setItemErrors(newErrors)
+        if (Object.keys(errors).length > 0) {
+            setItemErrors(errors)
             return
         }
 
-        // Update the appropriate array based on whether it's a new or existing item
-        if (isNewArticle) {
-            const newItemsArray = [...(formData.newItems || [])]
-            if (editingIndex < newItemsArray.length) {
-                newItemsArray[editingIndex] = {
-                    name: currentItem.name,
-                    uniteMesure: currentItem.uniteMesure,
-                    _uiData: {
-
-                        quantiteDemande: currentItem.quantiteDemande
-                    }
-                }
-                setFormData({ ...formData, newItems: newItemsArray })
-            }
-        } else {
-            const itemsArray = [...(formData.items || [])]
-            if (editingIndex < itemsArray.length) {
-                itemsArray[editingIndex] = {
-                    article_id: currentItem.article_id,
-                    uniteMesure: currentItem.uniteMesure,
-                    _uiData: {
-
-                        quantiteDemande: currentItem.quantiteDemande,
-                        designation: articles.find(a => a.id === currentItem.article_id)?.name || ""
-                    }
-                }
-                setFormData({ ...formData, items: itemsArray })
-            }
-        }
+        setFormData((prev) => {
+            const updatedItems = [...prev.items]
+            updatedItems[editingIndex] = { ...currentItem }
+            return { ...prev, items: updatedItems }
+        })
 
         // Réinitialiser le formulaire
-        setCurrentItem({
-            name: "",
-            article_id: null,
-            uniteMesure: "",
-            quantiteDemande: 0
-        })
+        setCurrentItem(initialItemState)
         setEditingIndex(null)
         setItemErrors({})
     }
 
-    const editItem = (index: number, isNew: boolean) => {
-        if (isNew) {
-            const item = formData.newItems?.[index]
-            if (item) {
-                setCurrentItem({
-                    name: item.name,
-                    article_id: null,
-                    uniteMesure: item.uniteMesure || "",
-                    quantiteDemande: item._uiData?.quantiteDemande || ""
-                })
-                setIsNewArticle(true)
-            }
-        } else {
-            const item = formData.items?.[index]
-            if (item) {
-                setCurrentItem({
-                    name: "",
-                    article_id: item.article_id,
-                    uniteMesure: item.uniteMesure || "",
-                    quantiteDemande: item._uiData?.quantiteDemande || ""
-                })
-                setIsNewArticle(false)
-            }
-        }
+    const editItem = (index: number) => {
+        const item = formData.items[index]
+        setCurrentItem({ ...item })
         setEditingIndex(index)
         setItemErrors({})
     }
 
-    const deleteItem = (index: number, isNew: boolean) => {
-        if (isNew) {
-            const newItemsArray = [...(formData.newItems || [])].filter((_, i) => i !== index)
-            setFormData({ ...formData, newItems: newItemsArray })
-        } else {
-            const itemsArray = [...(formData.items || [])].filter((_, i) => i !== index)
-            setFormData({ ...formData, items: itemsArray })
-        }
+    const deleteItem = (index: number) => {
+        setFormData((prev) => ({
+            ...prev,
+            items: prev.items.filter((_, i) => i !== index),
+        }))
     }
 
     const isItemValid = (): boolean => {
-        if (isNewArticle) {
+        if (currentItem.isNew) {
             return !!(currentItem.name && currentItem.uniteMesure && currentItem.quantiteDemande)
         } else {
             return !!(currentItem.article_id && currentItem.uniteMesure && currentItem.quantiteDemande)
         }
-    }
-
-    // Combine both arrays for display purposes
-    const getAllItems = () => {
-        const newItemsWithMeta = (formData.newItems || []).map((item: any, index: any) => ({
-            ...item,
-            _isNew: true,
-            _index: index,
-            designation: item.name,
-            uniteMesure: item.uniteMesure || "",
-            quantiteDemande: item._uiData?.quantiteDemande || ""
-        }))
-
-        const existingItemsWithMeta = (formData.items || []).map((item, index) => ({
-            ...item,
-            _isNew: false,
-            _index: index,
-            designation: item._uiData?.designation || articles.find(a => a.id === item.article_id)?.name || "Article inconnu",
-            uniteMesure: item.uniteMesure || "",
-            quantiteDemande: item._uiData?.quantiteDemande || ""
-        }))
-
-        return [...newItemsWithMeta, ...existingItemsWithMeta]
     }
 
     return (
@@ -234,12 +142,12 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                     <label className="text-sm font-medium text-gray-700">Nouvel Article</label>
                     <input
                         type="checkbox"
-                        checked={isNewArticle}
-                        onChange={() => setIsNewArticle(!isNewArticle)}
+                        checked={currentItem.isNew}
+                        onChange={() => setCurrentItem((prev) => ({ ...prev, isNew: !prev.isNew, article_id: null }))}
                     />
                 </div>
 
-                {isNewArticle ? (
+                {currentItem.isNew ? (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Nom de l'article *</label>
                         <input
@@ -261,7 +169,7 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                                 ${itemErrors.article_id ? "border-red-500" : "border-gray-300"}`}
                         >
                             <option value="">Sélectionner un article</option>
-                            {articles.map((article: any) => (
+                            {articles?.map((article: Article) => (
                                 <option key={article.id} value={article.id}>
                                     {article.name}
                                 </option>
@@ -324,11 +232,11 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
             </div>
 
             {/* Items Table */}
-            {(formData.newItems?.length > 0 || formData.items?.length > 0) && (
+            {formData.items.length > 0 && (
                 <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
                     <h3 className="font-medium text-gray-800 p-4 border-b border-gray-100 flex items-center gap-2">
                         <FileText size={18} className="text-blue-600" />
-                        Articles ajoutés ({getAllItems().length})
+                        Articles ajoutés ({formData.items.length})
                     </h3>
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
@@ -343,30 +251,30 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {getAllItems().map((item, index) => (
+                                {formData.items.map((item: any, index: any) => (
                                     <tr key={index} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">{index + 1}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                                             <div className="flex items-center">
-                                                {item.designation}
+                                                {item.isNew
+                                                    ? item.name
+                                                    : (item.name || articles?.find(a => a.id == item.article_id).name || "Article inconnu")}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                            {item._isNew ? "Nouveau" : "Existant"}
-                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{item.isNew ? "Nouveau" : "Existant"}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">{item.uniteMesure}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">{item.quantiteDemande}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                                             <button
                                                 type="button"
-                                                onClick={() => editItem(item._index, item._isNew)}
+                                                onClick={() => editItem(index)}
                                                 className="text-blue-600 hover:text-blue-800 mr-3"
                                             >
                                                 <Edit2 size={16} />
                                             </button>
                                             <button
                                                 type="button"
-                                                onClick={() => deleteItem(item._index, item._isNew)}
+                                                onClick={() => deleteItem(index)}
                                                 className="text-red-600 hover:text-red-800"
                                             >
                                                 <Trash2 size={16} />
@@ -382,3 +290,4 @@ export const StepTwo: React.FC<StepProps> = ({ formData, setFormData }) => {
         </div>
     )
 }
+

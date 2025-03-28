@@ -12,13 +12,16 @@ import { StepThree } from "./step-three"
 import { StepTwo } from "./step-two"
 
 import { useAddRequisition } from "../../../hooks/apiFeatures/useRequisitions"
-
+import { useFetchArticles } from "../../../hooks/apiFeatures/useArticles"
 
 export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) => {
     const [step, setStep] = useState(1)
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [formErrors, setFormErrors] = useState<FormErrors>({})
     const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const { data: articles = [] } = useFetchArticles()
+
 
     const addRequisitionMutation = useAddRequisition()
 
@@ -151,6 +154,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({ onClose }) =
             setErrors: setFormErrors,
             onNext: nextStep,
             onPrevious: prevStep,
+            articles: articles
         }
 
         switch (step) {

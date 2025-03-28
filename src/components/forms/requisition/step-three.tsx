@@ -1,27 +1,12 @@
+"use client"
+
 import type React from "react"
-import { CheckCircle, CalendarDays, Building } from 'lucide-react'
+import { CheckCircle, CalendarDays, Building } from "lucide-react"
 import type { StepProps } from "../../../types/requisition"
 
-export const StepThree: React.FC<StepProps> = ({ formData, setFormData }) => {
+export const StepThree: React.FC<StepProps> = ({ formData, setFormData, articles }) => {
     const handleCommentChange = (value: string) => {
-        setFormData({ ...formData, comment: value })
-    }
-
-    // Combine both arrays for display purposes
-    const getAllItems = () => {
-        const newItemsWithMeta = (formData.newItems || []).map(item => ({
-            designation: item.name,
-            uniteMesure: item.uniteMesure || "",
-            quantiteDemande: parseInt(item._uiData?.quantiteDemande || 0)
-        }))
-
-        const existingItemsWithMeta = (formData.items || []).map(item => ({
-            designation: item._uiData?.designation || "Article existant",
-            uniteMesure: item.uniteMesure || "",
-            quantiteDemande: item._uiData?.quantiteDemande || ""
-        }))
-
-        return [...newItemsWithMeta, ...existingItemsWithMeta]
+        setFormData((prev: any) => ({ ...prev, comment: value }))
     }
 
     return (
@@ -44,7 +29,7 @@ export const StepThree: React.FC<StepProps> = ({ formData, setFormData }) => {
                             <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
                                 <div className="flex items-center gap-1">
                                     <CalendarDays size={14} />
-                                    <span>{new Date(formData.date).toLocaleString()}</span>
+                                    <span>{new Date(formData.date).toLocaleDateString()}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Building size={14} />
@@ -61,19 +46,23 @@ export const StepThree: React.FC<StepProps> = ({ formData, setFormData }) => {
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Désignation</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unité</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qté D</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {getAllItems().map((item, index) => (
+                            {formData.items.map((item: any, index: any) => (
                                 <tr key={index} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">{index + 1}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                                         <div className="flex items-center">
-                                            {item.designation}
+                                            {item.isNew
+                                                ? item.name
+                                                : (item.name || articles?.find((a: any) => a.id === item.article_id)?.name || "Article inconnu")}
                                         </div>
                                     </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">{item.isNew ? "Nouveau" : "Existant"}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.uniteMesure}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">{item.quantiteDemande}</td>
                                 </tr>
@@ -96,3 +85,4 @@ export const StepThree: React.FC<StepProps> = ({ formData, setFormData }) => {
         </div>
     )
 }
+

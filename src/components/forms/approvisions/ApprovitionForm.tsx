@@ -1,10 +1,29 @@
+"use client"
 
-import React, { useState, useRef } from "react"
+import type React from "react"
+import { useState, useRef } from "react"
 import { StepIndicator } from "../step-indicator"
-import { Plus, Trash2, FileText, X, Check, AlertTriangle, Package, CreditCard, DollarSign, AlertCircle, CheckCircle } from 'lucide-react'
+import { Plus, Trash2, FileText, X, Check, AlertTriangle, CheckCircle } from "lucide-react"
+import SelectSearch, { type SelectOption } from "../../ui/selectSearch"
 
-import type { RequisitionItem } from "../../../types/requisition"
-import { useNavigate } from "react-router-dom"
+// Types
+interface Article {
+    id: number
+    name: string
+    description?: string
+}
+
+interface RequisitionItem {
+    id: number
+    article: Article
+    article_id: number
+    quantiteDemande: number
+    unitPrice?: number
+    prix_total?: number
+    supplier_id?: string | null
+    transaction_type?: string
+    avance_credit?: number
+}
 
 // Types de transaction disponibles
 const transactionTypes = [
@@ -13,22 +32,22 @@ const transactionTypes = [
         name: "En Stock",
         type: "stock",
         icon: "Package",
-        description: "Articles disponibles en stock"
+        description: "Articles disponibles en stock",
     },
     {
         id: "type-002",
         name: "Crédit",
         type: "credit",
         icon: "CreditCard",
-        description: "Paiement différé"
+        description: "Paiement différé",
     },
     {
         id: "type-003",
         name: "Paiement Cash",
         type: "cash",
         icon: "DollarSign",
-        description: "Paiement immédiat"
-    }
+        description: "Paiement immédiat",
+    },
 ]
 
 // Priorités disponibles
@@ -37,91 +56,165 @@ const priorities = [
         value: "low",
         label: "Basse",
         color: "blue",
-        description: "Délai flexible"
+        description: "Délai flexible",
     },
     {
         value: "normal",
         label: "Normale",
         color: "yellow",
-        description: "Délai standard"
+        description: "Délai standard",
     },
     {
         value: "high",
         label: "Haute",
         color: "red",
-        description: "Urgent"
-    }
+        description: "Urgent",
+    },
 ]
 
-function ApprovitionForm({ onClose, requisition }) {
+function ApprovitionForm({ onClose, requisition }: any) {
     // Étapes du formulaire
     const steps = [
         { id: 1, label: "Sélection des articles" },
         { id: 2, label: "Prix et détails" },
-        { id: 3, label: "Confirmation" }
+        { id: 3, label: "Confirmation" },
     ]
-    const suppliers = [
-        { id: "1", name: "Supplier 1" },
-        { id: "2", name: "Supplier 2" },
-        { id: "3", name: "Supplier 3" },
-        { id: "4", name: "Supplier 4" },
-    ]
+
+    // État initial des fournisseurs
+    const [suppliers, setSuppliers] = useState<SelectOption[]>([
+        { value: "1", label: "Supplier 1" },
+        { value: "2", label: "Supplier 2" },
+        { value: "3", label: "Supplier 3" },
+        { value: "4", label: "Supplier 4" },
+    ])
 
     // États du formulaire
     const [currentStep, setCurrentStep] = useState(1)
-    const [selectedRequisition, setSelectedRequisition] = useState(requisition)
     const [selectedItems, setSelectedItems] = useState<RequisitionItem[]>([])
-    const [transactionType, setTransactionType] = useState("stock")
-    const [advancePayment, setAdvancePayment] = useState(0)
     const [priority, setPriority] = useState("normal")
     const [comment, setComment] = useState("")
     const [attachments, setAttachments] = useState<File[]>([])
     const [showModal, setShowModal] = useState(false)
     const [modalContent, setModalContent] = useState({ title: "", message: "", type: "" })
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const navigate = useNavigate();
-
+    const [isAddingSupplier, setIsAddingSupplier] = useState(false)
+    const user = { id: null, name: null }
     // Référence pour l'input de fichier
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     // Calculer le total général
     const grandTotal = selectedItems.reduce((sum, item) => {
-        const totalPrice = item.unitPrice && item.quantity ? item.unitPrice * item.quantity : 0
+        const totalPrice = item.unitPrice && item.quantiteDemande ? item.unitPrice * item.quantiteDemande : 0
         return sum + totalPrice
     }, 0)
 
     // Ajouter un article à la liste
-    const handleAddItem = (item: any) => {
+    const handleAddItem = (item: RequisitionItem) => {
         // Vérifier si l'article est déjà dans la liste
-        if (selectedItems.some(selectedItem => selectedItem.id === item.id)) {
+        if (selectedItems.some((selectedItem) => selectedItem.id === item.id)) {
             showModalAlert("Information", "Cet article est déjà ajouté à la liste.", "info")
             return
         }
 
         const newItem = {
             ...item,
-            unitPrice: 0, // Prix unitaire à définir par l'utilisateur
-            totalPrice: 0 // Sera calculé après l'ajout du prix unitaire
+            unitPrice: 0,
+            prix_total: 0,
+            supplier_id: null,
+            transaction_type: "stock",
+            avance_credit: 0,
         }
 
         setSelectedItems([...selectedItems, newItem])
     }
 
     // Supprimer un article de la liste
-    const handleRemoveItem = (itemId: string) => {
-        setSelectedItems(selectedItems.filter(item => item.id !== itemId))
+    const handleRemoveItem = (itemId: number) => {
+        setSelectedItems(selectedItems.filter((item) => item.id !== itemId))
     }
 
     // Mettre à jour le prix unitaire d'un article
     const handleUnitPriceChange = (itemId: number, price: number) => {
-        setSelectedItems(selectedItems.map(item => {
-            if (item.id === itemId) {
-                const unitPrice = price
-                const totalPrice = unitPrice * item.quantiteDemande
-                return { ...item, unitPrice, totalPrice }
+        setSelectedItems(
+            selectedItems.map((item) => {
+                if (item.id === itemId) {
+                    const unitPrice = price
+                    const prix_total = unitPrice * item.quantiteDemande
+                    return { ...item, unitPrice, prix_total }
+                }
+                return item
+            }),
+        )
+    }
+
+    // Mettre à jour le fournisseur d'un article
+    const handleSupplierChange = (itemId: number, supplier: SelectOption | null) => {
+        setSelectedItems(
+            selectedItems.map((item) => {
+                if (item.id === itemId) {
+                    return { ...item, supplier_id: supplier ? supplier.value : null }
+                }
+                return item
+            }),
+        )
+    }
+
+    // Ajouter un nouveau fournisseur
+    const handleAddSupplier = async (name: string) => {
+        setIsAddingSupplier(true)
+
+        try {
+            // Simuler un appel API pour ajouter un fournisseur
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+
+            // Générer un ID unique pour le nouveau fournisseur
+            const newId = `new-${Date.now()}`
+
+            // Créer le nouveau fournisseur
+            const newSupplier: SelectOption = {
+                value: newId,
+                label: name,
             }
-            return item
-        }))
+
+            // Ajouter le fournisseur à la liste
+            setSuppliers((prev) => [...prev, newSupplier])
+
+            // Afficher un message de succès
+            showModalAlert("Succès", `Le fournisseur "${name}" a été ajouté avec succès.`, "success")
+
+            return newSupplier
+        } catch (error) {
+            showModalAlert("Erreur", "Une erreur est survenue lors de l'ajout du fournisseur.", "error")
+            return null
+        } finally {
+            setIsAddingSupplier(false)
+        }
+    }
+
+    // Mettre à jour le type de transaction d'un article
+    const handleTransactionTypeChange = (itemId: number, type: string) => {
+        setSelectedItems(
+            selectedItems.map((item) => {
+                if (item.id === itemId) {
+                    // Si on change de crédit à autre chose, réinitialiser l'avance
+                    const avance_credit = type === "credit" ? item.avance_credit : 0
+                    return { ...item, transaction_type: type, avance_credit }
+                }
+                return item
+            }),
+        )
+    }
+
+    // Mettre à jour l'avance crédit d'un article
+    const handleAdvancePaymentChange = (itemId: number, percentage: number) => {
+        setSelectedItems(
+            selectedItems.map((item) => {
+                if (item.id === itemId) {
+                    return { ...item, avance_credit: percentage }
+                }
+                return item
+            }),
+        )
     }
 
     // Gérer le changement d'étape
@@ -131,9 +224,22 @@ function ApprovitionForm({ onClose, requisition }) {
             return
         }
 
+        if (currentStep === 1) {
+            // Vérifier que tous les articles ont un fournisseur et un type de transaction
+            const missingInfo = selectedItems.some((item) => !item.supplier_id || !item.transaction_type)
+            if (missingInfo) {
+                showModalAlert(
+                    "Attention",
+                    "Veuillez définir un fournisseur et un type de transaction pour tous les articles.",
+                    "warning",
+                )
+                return
+            }
+        }
+
         if (currentStep === 2) {
             // Vérifier que tous les articles ont un prix unitaire
-            const missingPrices = selectedItems.some(item => !item.unitPrice || item.unitPrice <= 0)
+            const missingPrices = selectedItems.some((item) => !item.unitPrice || item.unitPrice <= 0)
             if (missingPrices) {
                 showModalAlert("Attention", "Veuillez définir un prix unitaire pour tous les articles.", "warning")
                 return
@@ -172,38 +278,50 @@ function ApprovitionForm({ onClose, requisition }) {
         setShowModal(true)
     }
 
+    // Préparer les données pour l'API
+    const prepareDataForApi = () => {
+        // Transformer les items pour correspondre à la structure attendue par l'API
+        const formattedItems = selectedItems.map((item) => ({
+            article_id: item.article_id,
+            prix_unitaire: item.unitPrice || 0,
+            prix_total: item.prix_total || 0,
+            transaction_type: item.transaction_type || "stock",
+            avance_credit: item.transaction_type === "credit" ? item.avance_credit || 0 : 0,
+            supplier_id: item.supplier_id || null,
+        }))
+
+        return {
+            requisition_id: requisition.id,
+            priority,
+            comment,
+            user_id: user?.id || null,
+            items: formattedItems,
+        }
+    }
+
     // Soumettre le formulaire
     const handleSubmit = async () => {
         setIsSubmitting(true)
 
         try {
+            // Préparer les données pour l'API
+            const apiData = prepareDataForApi()
+
             // Simuler un appel API
-            await new Promise(resolve => setTimeout(resolve, 3000))
+            await new Promise((resolve) => setTimeout(resolve, 1000))
 
-            console.log("Approvisionnement soumis avec succès:", {
-                items: selectedItems,
-                transactionType,
-                advancePayment: transactionType === "credit" ? advancePayment : 0,
-                priority,
-                attachments: attachments.map(file => file.name),
-                comment,
-                total: grandTotal
-            })
+            console.log("Données envoyées à l'API:", apiData)
 
-            showModalAlert("Succès", "Votre demande d'approvisionnement a été envoyée au service de comptabilité avec succès.", "success")
+            showModalAlert(
+                "Succès",
+                "Votre demande d'approvisionnement a été envoyée au service de comptabilité avec succès.",
+                "success",
+            )
 
             // Réinitialiser le formulaire après soumission
             setTimeout(() => {
-                setCurrentStep(1)
-                setSelectedRequisition("")
-                setSelectedItems([])
-                setTransactionType("stock")
-                setAdvancePayment(0)
-                setPriority("normal")
-                setComment("")
-                setAttachments([])
-            }, 100)
-            navigate("/comptabilite");
+                onClose()
+            }, 2000)
         } catch (error) {
             console.error("Erreur lors de la soumission:", error)
             showModalAlert("Erreur", "Une erreur est survenue lors de l'envoi de votre demande. Veuillez réessayer.", "error")
@@ -215,24 +333,12 @@ function ApprovitionForm({ onClose, requisition }) {
     // Annuler la réquisition
     const handleCancel = () => {
         showModalAlert("Confirmation", "Êtes-vous sûr de vouloir annuler cette demande d'approvisionnement?", "confirm")
-
     }
 
     // Confirmer l'annulation
     const confirmCancel = () => {
         setShowModal(false)
-        console.log("Demande d'approvisionnement annulée")
-
-        // Réinitialiser le formulaire
-        setCurrentStep(1)
-        setSelectedRequisition("")
-        setSelectedItems([])
-        setTransactionType("stock")
-        setAdvancePayment(0)
-        setPriority("normal")
-        setComment("")
-        setAttachments([])
-        setTimeout(() => onClose(), 10)
+        onClose()
     }
 
     // Rendu des étapes du formulaire
@@ -241,36 +347,46 @@ function ApprovitionForm({ onClose, requisition }) {
             case 1:
                 return (
                     <div className="p-6 bg-white rounded-b-lg shadow-md">
-                        {selectedRequisition && (
+                        {requisition && (
                             <div className="border border-blue-200 rounded-lg p-4 mb-6">
                                 <h3 className="text-lg font-medium text-blue-800 mb-4">Articles disponibles</h3>
                                 <div className="overflow-x-auto">
                                     <table className="min-w-full divide-y divide-blue-200">
                                         <thead className="bg-blue-50">
                                             <tr>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Article</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Description</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Quantité</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Action</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                                    Article
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                                    Description
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                                    Quantité
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                                    Action
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-blue-100">
-                                            {selectedRequisition
-                                                ?.items.map(item => (
-                                                    <tr key={item.id} className="hover:bg-blue-50">
-                                                        <td className="px-4 py-3 text-sm text-gray-700">{item.article.name}</td>
-                                                        <td className="px-4 py-3 text-sm text-gray-600">{item.article.description}</td>
-                                                        <td className="px-4 py-3 text-sm text-gray-700">{parseInt(item.quantiteDemande)}</td>
-                                                        <td className="px-4 py-3 text-sm">
-                                                            <button
-                                                                onClick={() => handleAddItem(item)}
-                                                                className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700"
-                                                            >
-                                                                <Plus size={16} className="mr-1" />
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                            {requisition?.items.map((item: any) => (
+                                                <tr key={item.id} className="hover:bg-blue-50">
+                                                    <td className="px-4 py-3 text-sm text-gray-700">{item.article.name}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">{item.article.description || "-"}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-700">
+                                                        {Number.parseInt(item.quantiteDemande.toString())}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm">
+                                                        <button
+                                                            onClick={() => handleAddItem(item)}
+                                                            className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700"
+                                                        >
+                                                            <Plus size={16} className="mr-1" />
+                                                            Ajouter
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
                                         </tbody>
                                     </table>
                                 </div>
@@ -284,57 +400,91 @@ function ApprovitionForm({ onClose, requisition }) {
                                     <table className="min-w-full divide-y divide-blue-200">
                                         <thead className="bg-blue-50">
                                             <tr>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Article</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Quantité</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Stock disponible</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Fourniseur</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Type de Transaction</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Action</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                                    Article
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                                    Quantité
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                                    Fournisseur
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                                    Type de Transaction
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                                    Action
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-blue-100">
-                                            {selectedItems.map(item => (
+                                            {selectedItems.map((item) => (
                                                 <tr key={item.id} className="hover:bg-blue-50">
                                                     <td className="px-4 py-3 text-sm text-gray-700">{item.article.name}</td>
-                                                    <td className="px-4 py-3 text-sm text-gray-700">{item.quantiteDemande}</td>
-                                                    <td className="px-4 py-3 text-sm text-gray-700">0</td>
                                                     <td className="px-4 py-3 text-sm text-gray-700">
-                                                        <select
-                                                            value={item.supplier}
-                                                            onChange={(e) => handleSupplierChange(item.id, e.target.value)}
-                                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                                        >
-                                                            <option value="">Choisissez un fournisseur</option>
-                                                            {suppliers?.map(supplier => (
-                                                                <option key={supplier.id} value={supplier.id}>
-                                                                    {supplier.name}
-                                                                </option>
-                                                            ))}
-                                                        </select>
+                                                        {Number.parseInt(item.quantiteDemande.toString())}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-700">
+                                                        <SelectSearch
+                                                            options={suppliers}
+                                                            value={
+                                                                item.supplier_id ? suppliers.find((s) => s.value === item.supplier_id) || null : null
+                                                            }
+                                                            onChange={(supplier) => handleSupplierChange(item.id, supplier)}
+                                                            onAddNewItem={async (name) => {
+                                                                const newSupplier = await handleAddSupplier(name)
+                                                                if (newSupplier) {
+                                                                    handleSupplierChange(item.id, newSupplier)
+                                                                }
+                                                            }}
+                                                            placeholder="Sélectionner un fournisseur"
+                                                            isSearchable={true}
+                                                            disabled={isAddingSupplier}
+                                                        />
                                                     </td>
                                                     <td className="px-4 py-3 text-sm text-gray-700">
                                                         <div>
-                                                            {transactionTypes.map(type => (
+                                                            {transactionTypes.map((type) => (
                                                                 <label key={type.id} className="inline-flex items-center mr-4">
                                                                     <input
                                                                         type="radio"
                                                                         name={`transactionType-${item.id}`}
                                                                         value={type.type}
-                                                                        checked={item.transactionType === type.type}
+                                                                        checked={item.transaction_type === type.type}
                                                                         onChange={(e) => handleTransactionTypeChange(item.id, e.target.value)}
+                                                                        className="text-blue-600"
                                                                     />
-                                                                    <span className="ml-2">{type.name}</span>
+                                                                    <span className="ml-2 text-sm">{type.name}</span>
                                                                 </label>
                                                             ))}
                                                         </div>
+
+                                                        {item.transaction_type === "credit" && (
+                                                            <div className="mt-2 pl-6">
+                                                                <label className="block text-xs text-gray-600 mb-1">Avance (%)</label>
+                                                                <input
+                                                                    type="range"
+                                                                    min="0"
+                                                                    max="50"
+                                                                    step="5"
+                                                                    value={item.avance_credit || 0}
+                                                                    onChange={(e) => handleAdvancePaymentChange(item.id, Number.parseInt(e.target.value))}
+                                                                    className="w-full accent-blue-500"
+                                                                />
+                                                                <div className="flex justify-between text-xs text-gray-500">
+                                                                    <span>0%</span>
+                                                                    <span>{item.avance_credit || 0}%</span>
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </td>
                                                     <td className="px-4 py-3 text-sm">
-
                                                         <button
                                                             onClick={() => handleRemoveItem(item.id)}
                                                             className="inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700"
                                                         >
                                                             <Trash2 size={16} className="mr-1" />
+                                                            Retirer
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -356,47 +506,66 @@ function ApprovitionForm({ onClose, requisition }) {
                             <table className="min-w-full divide-y divide-blue-200">
                                 <thead className="bg-blue-50">
                                     <tr>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Article</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Description</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Quantité</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Prix unitaire (€)</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Prix total (€)</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                            Article
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                            Fournisseur
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                            Quantité
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                            Prix unitaire (€)
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                            Prix total (€)
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-blue-100">
-                                    {selectedItems.map(item => (
+                                    {selectedItems.map((item) => (
                                         <tr key={item.id} className="hover:bg-blue-50">
                                             <td className="px-4 py-3 text-sm text-gray-700">{item.article.name}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-600">{item.article.description}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-700">{item.quantiteDemande}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-700">
+                                                {suppliers.find((s) => s.value === item.supplier_id)?.label || "-"}
+                                            </td>
+                                            <td className="px-4 py-3 text-sm text-gray-700">
+                                                {Number.parseInt(item.quantiteDemande.toString())}
+                                            </td>
                                             <td className="px-4 py-3 text-sm">
                                                 <input
                                                     type="number"
                                                     min="0"
                                                     step="0.01"
                                                     value={item?.unitPrice || 0}
-                                                    onChange={(e) => handleUnitPriceChange(item.id, parseFloat(e.target.value) || 0)}
+                                                    onChange={(e) => handleUnitPriceChange(item.id, Number.parseFloat(e.target.value) || 0)}
                                                     className="w-24 p-1.5 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 />
                                             </td>
                                             <td className="px-4 py-3 text-sm font-medium text-blue-700">
-                                                {item.unitPrice ? (item.unitPrice * item.quantity).toFixed(2) : "0.00"}
+                                                {item.unitPrice ? (item.unitPrice * item.quantiteDemande).toFixed(2) : "0.00"}
                                             </td>
                                         </tr>
                                     ))}
                                     <tr className="bg-blue-50">
-                                        <td colSpan={4} className="px-4 py-3 text-right text-sm font-medium text-blue-800">Total</td>
+                                        <td colSpan={4} className="px-4 py-3 text-right text-sm font-medium text-blue-800">
+                                            Total
+                                        </td>
                                         <td className="px-4 py-3 text-sm font-bold text-blue-800">{grandTotal.toFixed(2)} €</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
 
-                        <div>
+                        <div className="mb-6">
                             <label className="block text-sm font-medium text-gray-700 mb-1">Priorité</label>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                {priorities.map(p => (
-                                    <label key={p.value} className="flex items-center p-3 border border-gray-100 rounded-md hover:bg-blue-50 transition-colors cursor-pointer">
+                                {priorities.map((p) => (
+                                    <label
+                                        key={p.value}
+                                        className="flex items-center p-3 border border-gray-100 rounded-md hover:bg-blue-50 transition-colors cursor-pointer"
+                                    >
                                         <input
                                             type="radio"
                                             checked={priority === p.value}
@@ -418,13 +587,7 @@ function ApprovitionForm({ onClose, requisition }) {
                         <div>
                             <h3 className="text-lg font-medium text-blue-800 mb-4">Pièces jointes</h3>
                             <div className="mb-4">
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    onChange={handleFileChange}
-                                    className="hidden"
-                                    multiple
-                                />
+                                <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" multiple />
                                 <button
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
@@ -465,100 +628,27 @@ function ApprovitionForm({ onClose, requisition }) {
                                 placeholder="Ajoutez un commentaire ou des instructions supplémentaires..."
                             ></textarea>
                         </div>
-
                     </div>
                 )
-
-            // case 3:
-            //     return (
-            //         <div className="p-6 bg-white rounded-b-lg shadow-md">
-            //             <div className="grid grid-cols-1 gap-6">
-            //                 <div>
-            //                     <label className="block text-sm font-medium text-gray-700 mb-2">Type de Transaction</label>
-            //                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-            //                         {transactionTypes.map(type => {
-            //                             let Icon
-            //                             switch (type.icon) {
-            //                                 case "Package":
-            //                                     Icon = Package
-            //                                     break
-            //                                 case "CreditCard":
-            //                                     Icon = CreditCard
-            //                                     break
-            //                                 case "DollarSign":
-            //                                     Icon = DollarSign
-            //                                     break
-            //                                 default:
-            //                                     Icon = Package
-            //                             }
-
-            //                             return (
-            //                                 <label key={type.id} className="flex items-center p-3 border border-gray-100 rounded-md hover:bg-blue-50 transition-colors cursor-pointer">
-            //                                     <input
-            //                                         type="radio"
-            //                                         checked={transactionType === type.type}
-            //                                         onChange={() => setTransactionType(type.type)}
-            //                                         className="w-4 h-4 text-blue-600"
-            //                                     />
-            //                                     <div className="ml-2">
-            //                                         <div className="flex items-center gap-1.5">
-            //                                             <Icon size={16} className={`text-${type.type === 'stock' ? 'blue' : type.type === 'credit' ? 'orange' : 'green'}-600`} />
-            //                                             <span className="text-sm font-medium">{type.name}</span>
-            //                                         </div>
-            //                                         <p className="text-xs text-gray-500 mt-1">{type.description}</p>
-            //                                     </div>
-            //                                 </label>
-            //                             )
-            //                         })}
-            //                     </div>
-            //                 </div>
-
-            //                 {/* {transactionType === "credit" && (
-            //                     <div className="p-4 border rounded-md bg-orange-50 border-orange-200">
-            //                         <h4 className="text-sm font-medium text-orange-800 mb-2 flex items-center gap-2">
-            //                             <AlertCircle size={16} />
-            //                             Option de paiement anticipé
-            //                         </h4>
-            //                         <div className="flex flex-col">
-            //                             <label className="text-sm text-gray-700 mb-1">Montant d'avance (%)</label>
-            //                             <input
-            //                                 type="range"
-            //                                 min="0"
-            //                                 max="50"
-            //                                 step="5"
-            //                                 value={advancePayment}
-            //                                 onChange={(e) => setAdvancePayment(parseInt(e.target.value))}
-            //                                 className="w-full accent-orange-500"
-            //                             />
-            //                             <div className="flex justify-between text-xs text-gray-500 mt-1">
-            //                                 <span>0%</span>
-            //                                 <span>Paiement d'avance: {advancePayment}%</span>
-            //                                 <span>50%</span>
-            //                             </div>
-            //                         </div>
-            //                     </div>
-            //                 )} */}
-            //             </div>
-            //         </div>
-            //     )
 
             case 3:
                 return (
                     <div className="p-6 bg-white rounded-b-lg shadow-md">
-
                         <div className="bg-green-50 mb-4 border border-green-200 rounded-lg p-4 flex items-start gap-3">
                             <CheckCircle className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
                             <div>
                                 <p className="text-sm text-green-700 font-medium">Prêt à soumettre</p>
                                 <p className="text-sm text-green-700 mt-1">
-                                    Veuillez vérifier les informations ci-dessous avant de soumettre votre réquisition.
+                                    Veuillez vérifier les informations ci-dessous avant de soumettre votre demande.
                                 </p>
                             </div>
                         </div>
 
                         <div className="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-200">
                             <h3 className="text-lg font-medium text-blue-800 mb-2">Récapitulatif de la demande</h3>
-                            <p className="text-sm text-blue-700 mb-4">Veuillez vérifier les informations ci-dessous avant de soumettre votre demande.</p>
+                            <p className="text-sm text-blue-700 mb-4">
+                                Veuillez vérifier les informations ci-dessous avant de soumettre votre demande.
+                            </p>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
@@ -570,23 +660,11 @@ function ApprovitionForm({ onClose, requisition }) {
                                     <p className="text-sm text-gray-700">{grandTotal.toFixed(2)} €</p>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-blue-700">Type de transaction:</p>
-                                    <p className="text-sm text-gray-700">
-                                        {transactionTypes.find(t => t.type === transactionType)?.name || "Non spécifié"}
-                                    </p>
-                                </div>
-                                <div>
                                     <p className="text-sm font-medium text-blue-700">Priorité:</p>
                                     <p className="text-sm text-gray-700">
-                                        {priorities.find(p => p.value === priority)?.label || "Non spécifiée"}
+                                        {priorities.find((p) => p.value === priority)?.label || "Non spécifiée"}
                                     </p>
                                 </div>
-                                {transactionType === "credit" && (
-                                    <div>
-                                        <p className="text-sm font-medium text-blue-700">Paiement d'avance:</p>
-                                        <p className="text-sm text-gray-700">{advancePayment}%</p>
-                                    </div>
-                                )}
                                 <div>
                                     <p className="text-sm font-medium text-blue-700">Pièces jointes:</p>
                                     <p className="text-sm text-gray-700">{attachments.length} fichier(s)</p>
@@ -606,24 +684,69 @@ function ApprovitionForm({ onClose, requisition }) {
                             <table className="min-w-full divide-y divide-blue-200">
                                 <thead className="bg-blue-50">
                                     <tr>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Article</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Quantité</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Prix unitaire</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Prix total</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                            #
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                            Article
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                            Fournisseur
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                            Type
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                            Quantité
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                            Prix unitaire
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                            Prix total
+                                        </th>
+                                        {selectedItems.some((item) => item.transaction_type === "credit") && (
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                                Avance
+                                            </th>
+                                        )}
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-blue-100">
-                                    {selectedItems.map(item => (
+                                    {selectedItems.map((item, index) => (
                                         <tr key={item.id}>
-                                            <td className="px-4 py-3 text-sm text-gray-700">{item.name}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-700">{item.quantity}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-700">{index + 1}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-700">{item.article.name}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-700">
+                                                {suppliers.find((s) => s.value === item.supplier_id)?.label || "-"}
+                                            </td>
+                                            <td className="px-4 py-3 text-sm text-gray-700">
+                                                {transactionTypes.find((t) => t.type === item.transaction_type)?.name || "-"}
+                                            </td>
+                                            <td className="px-4 py-3 text-sm text-gray-700">{item.quantiteDemande}</td>
                                             <td className="px-4 py-3 text-sm text-gray-700">{item.unitPrice?.toFixed(2)} €</td>
-                                            <td className="px-4 py-3 text-sm text-gray-700">{(item.unitPrice && item.quantity) ? (item.unitPrice * item.quantity).toFixed(2) : "0.00"} €</td>
+                                            <td className="px-4 py-3 text-sm text-gray-700">
+                                                {item.unitPrice && item.quantiteDemande
+                                                    ? (item.unitPrice * item.quantiteDemande).toFixed(2)
+                                                    : "0.00"}{" "}
+                                                €
+                                            </td>
+                                            {selectedItems.some((item) => item.transaction_type === "credit") && (
+                                                <td className="px-4 py-3 text-sm text-gray-700">
+                                                    {item.transaction_type === "credit" ? `${item.avance_credit || 0}%` : "-"}
+                                                </td>
+                                            )}
                                         </tr>
                                     ))}
                                     <tr className="bg-blue-50">
-                                        <td colSpan={3} className="px-4 py-3 text-right text-sm font-medium text-blue-800">Total</td>
+                                        <td
+                                            colSpan={selectedItems.some((item) => item.transaction_type === "credit") ? 6 : 5}
+                                            className="px-4 py-3 text-right text-sm font-medium text-blue-800"
+                                        >
+                                            Total
+                                        </td>
                                         <td className="px-4 py-3 text-sm font-bold text-blue-800">{grandTotal.toFixed(2)} €</td>
+                                        <td></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -682,7 +805,9 @@ function ApprovitionForm({ onClose, requisition }) {
                         <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
                     </div>
 
-                    <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+                        &#8203;
+                    </span>
 
                     <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                         <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -733,12 +858,12 @@ function ApprovitionForm({ onClose, requisition }) {
     }
 
     return (
-        <div className="max-w-8xl max-h-[95%] mx-auto bg-gray-50 rounded-lg shadow-lg overflow-y-scroll">
+        <div className={`mx-auto bg-gray-50 rounded-lg shadow-lg overflow-hidden max-w-[1000px] `}>
+            <div className="">
+                <StepIndicator currentStep={currentStep} steps={steps} />
 
-            <StepIndicator currentStep={currentStep} steps={steps} />
-
-            {renderStepContent()}
-
+                {renderStepContent()}
+            </div>
             <div className="px-6 py-4 bg-gray-100 border-t border-gray-200 flex justify-between">
                 <button
                     type="button"
@@ -752,14 +877,10 @@ function ApprovitionForm({ onClose, requisition }) {
                     type="button"
                     onClick={currentStep === steps.length ? handleSubmit : goToNextStep}
                     disabled={isSubmitting}
-                    className={`px-4 py-2 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${isSubmitting
-                        ? "bg-blue-400 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700"
+                    className={`px-4 py-2 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${isSubmitting ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
                         }`}
                 >
-                    {currentStep === steps.length
-                        ? (isSubmitting ? "Envoi en cours..." : "Soumettre")
-                        : "Suivant"}
+                    {currentStep === steps.length ? (isSubmitting ? "Envoi en cours..." : "Soumettre") : "Suivant"}
                 </button>
             </div>
 
@@ -769,3 +890,4 @@ function ApprovitionForm({ onClose, requisition }) {
 }
 
 export default ApprovitionForm
+

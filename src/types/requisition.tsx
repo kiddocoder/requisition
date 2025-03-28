@@ -1,5 +1,13 @@
 export type TransactionType = "stock" | "credit" | "cash"
 export type PriorityType = "low" | "normal" | "high"
+
+import type React from "react"
+export interface Article {
+    id: number
+    name: string
+    uniteMesure: string
+}
+
 export interface RequisitionItem {
     id?: number
     article_id?: number | null
@@ -30,6 +38,7 @@ export interface StepProps {
     setErrors?: React.Dispatch<React.SetStateAction<FormErrors>>
     onNext?: () => void
     onPrevious?: () => void
+    articles?: any[]
 }
 
 export interface StepIndicatorProps {
