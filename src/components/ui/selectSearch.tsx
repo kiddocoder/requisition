@@ -231,27 +231,28 @@ const NewItemInput = React.forwardRef<HTMLInputElement, NewItemInputProps>(({ on
 
     return (
         <div className="p-2 border-b border-gray-200" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full">
                 <input
                     ref={ref}
                     type="text"
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="flex-1 py-2 px-3 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    className="py-2 w-full px-3 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Enter new item..."
                 />
-                <button
+                {/* <button
                     onClick={() => onSubmit(value)}
                     className="p-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
-                    Add
+                    <Plus size={16} />
                 </button>
+                */}
                 <button
                     onClick={onCancel}
                     className="p-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                 >
-                    Cancel
+                    <X size={16} />
                 </button>
             </div>
         </div>

@@ -5,6 +5,8 @@ import { useState, useRef } from "react"
 import { StepIndicator } from "../step-indicator"
 import { Plus, Trash2, FileText, X, Check, AlertTriangle, CheckCircle } from "lucide-react"
 import SelectSearch, { type SelectOption } from "../../ui/selectSearch"
+import { useGetSuppliers, useAddSupplier } from "../../../hooks/apiFeatures/useSuppliers"
+import { AddSupplier } from "../../../api/suppliers"
 
 // Types
 interface Article {
@@ -80,13 +82,7 @@ function ApprovitionForm({ onClose, requisition }: any) {
         { id: 3, label: "Confirmation" },
     ]
 
-    // État initial des fournisseurs
-    const [suppliers, setSuppliers] = useState<SelectOption[]>([
-        { value: "1", label: "Supplier 1" },
-        { value: "2", label: "Supplier 2" },
-        { value: "3", label: "Supplier 3" },
-        { value: "4", label: "Supplier 4" },
-    ])
+    const { data: suppliers = [] } = useGetSuppliers();
 
     // États du formulaire
     const [currentStep, setCurrentStep] = useState(1)
@@ -165,19 +161,16 @@ function ApprovitionForm({ onClose, requisition }: any) {
 
         try {
             // Simuler un appel API pour ajouter un fournisseur
-            await new Promise((resolve) => setTimeout(resolve, 1000))
-
-            // Générer un ID unique pour le nouveau fournisseur
-            const newId = `new-${Date.now()}`
+            const res = await AddSupplier({ name: name })
 
             // Créer le nouveau fournisseur
             const newSupplier: SelectOption = {
-                value: newId,
-                label: name,
+                value: res.id,
+                label: res.name,
             }
 
             // Ajouter le fournisseur à la liste
-            setSuppliers((prev) => [...prev, newSupplier])
+            suppliers.push({ ...newSupplier })
 
             // Afficher un message de succès
             showModalAlert("Succès", `Le fournisseur "${name}" a été ajouté avec succès.`, "success")
@@ -282,7 +275,7 @@ function ApprovitionForm({ onClose, requisition }: any) {
     const prepareDataForApi = () => {
         // Transformer les items pour correspondre à la structure attendue par l'API
         const formattedItems = selectedItems.map((item) => ({
-            article_id: item.article_id,
+            article_id: item.id,
             prix_unitaire: item.unitPrice || 0,
             prix_total: item.prix_total || 0,
             transaction_type: item.transaction_type || "stock",
@@ -294,6 +287,7 @@ function ApprovitionForm({ onClose, requisition }: any) {
             requisition_id: requisition.id,
             priority,
             comment,
+            attachments,
             user_id: user?.id || null,
             items: formattedItems,
         }
@@ -319,9 +313,9 @@ function ApprovitionForm({ onClose, requisition }: any) {
             )
 
             // Réinitialiser le formulaire après soumission
-            setTimeout(() => {
-                onClose()
-            }, 2000)
+            // setTimeout(() => {
+            //     onClose()
+            // }, 2000)
         } catch (error) {
             console.error("Erreur lors de la soumission:", error)
             showModalAlert("Erreur", "Une erreur est survenue lors de l'envoi de votre demande. Veuillez réessayer.", "error")
@@ -382,7 +376,7 @@ function ApprovitionForm({ onClose, requisition }: any) {
                                                             className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700"
                                                         >
                                                             <Plus size={16} className="mr-1" />
-                                                            Ajouter
+
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -484,7 +478,7 @@ function ApprovitionForm({ onClose, requisition }: any) {
                                                             className="inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700"
                                                         >
                                                             <Trash2 size={16} className="mr-1" />
-                                                            Retirer
+
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -740,7 +734,7 @@ function ApprovitionForm({ onClose, requisition }: any) {
                                     ))}
                                     <tr className="bg-blue-50">
                                         <td
-                                            colSpan={selectedItems.some((item) => item.transaction_type === "credit") ? 6 : 5}
+                                            colSpan={selectedItems.some((item) => item.transaction_type === "credit") ? 7 : 6}
                                             className="px-4 py-3 text-right text-sm font-medium text-blue-800"
                                         >
                                             Total
@@ -858,7 +852,7 @@ function ApprovitionForm({ onClose, requisition }: any) {
     }
 
     return (
-        <div className={`mx-auto bg-gray-50 rounded-lg shadow-lg overflow-hidden max-w-[1000px] `}>
+        <div className={`mx-auto bg-gray-50 rounded-lg shadow-lg w-full max-w-[1024px]  `}>
             <div className="">
                 <StepIndicator currentStep={currentStep} steps={steps} />
 

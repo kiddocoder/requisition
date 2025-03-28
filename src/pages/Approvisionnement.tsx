@@ -147,7 +147,7 @@ function Approvisionnement() {
 
             {isModalOpen && (
                 <div
-                    className={`fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center  z-50 transition-all duration-300 p-4`}
+                    className={`fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-300 p-4`}
                 >
 
                     <ApprovitionForm onClose={() => setIsModalOpen(false)} requisition={selectedRequisition} />
